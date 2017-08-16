@@ -97,7 +97,7 @@ object SbtJsonPlugin extends AutoPlugin {
     jsonSourcesDirectory := baseDirectory.value / "src" / "main" / "resources" / "json",
     jsonUrls := Nil,
     includeJsValues := SchemaExtractorOptions.includeAll,
-    jsonInterpreter := CaseClassToStringInterpreter.interpret,
+    jsonInterpreter := CaseClassToStringInterpreter.interpretWithPlayJsonFormats,
     printJsonModels := {
 
       val result = for {
