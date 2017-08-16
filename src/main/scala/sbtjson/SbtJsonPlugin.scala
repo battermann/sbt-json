@@ -14,6 +14,7 @@ import sbt.plugins.JvmPlugin
 import scala.io.Source
 
 object SbtJsonPlugin extends AutoPlugin {
+  override def requires = JvmPlugin
 
   private def generateCaseClassSources(
     src: File,
@@ -94,7 +95,6 @@ object SbtJsonPlugin extends AutoPlugin {
     }
   }
 
-  // override def requires = JvmPlugin
 
   object autoImport {
     lazy val printJsonModels: TaskKey[Unit] = TaskKey[Unit]("print-json-models", "Prints the generated JSON models.")
@@ -104,9 +104,9 @@ object SbtJsonPlugin extends AutoPlugin {
       "Specifies if play JSON formats should be created.")
     lazy val ignoreEmptyArrays: SettingKey[Boolean] = SettingKey[Boolean]("ignore-empty-arrays",
       "Specifies if empty arrays should be ignored.")
-    lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File]("source-directory",
+    lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File]("json-source-directory",
       "Path containing .JSON files.")
-    lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]]("urls", "Urls that serve JSON data.")
+    lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]]("json-urls", "Urls that serve JSON data.")
   }
 
   import autoImport._
