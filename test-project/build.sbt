@@ -5,7 +5,5 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.2",
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0",
     jsonUrls += "https://api.coindesk.com/v1/bpi/currentprice.json",
-    compile in Compile := {
-      (compile in Compile).dependsOn(generateJsonModels).value
-    }
+    sourceGenerators in Compile += (generateJsonModels in Compile)
   )

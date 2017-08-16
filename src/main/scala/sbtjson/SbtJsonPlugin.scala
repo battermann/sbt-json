@@ -95,10 +95,9 @@ object SbtJsonPlugin extends AutoPlugin {
     }
   }
 
-
   object autoImport {
     lazy val printJsonModels: TaskKey[Unit] = TaskKey[Unit]("print-json-models", "Prints the generated JSON models.")
-    lazy val generateJsonModels: TaskKey[Unit] = TaskKey[Unit]("generate-json-models",
+    lazy val generateJsonModels: TaskKey[Seq[File]] = TaskKey[Seq[File]]("generate-json-models",
       "Generates JSON model case classes.")
     lazy val playJsonFormats: SettingKey[Boolean] = SettingKey[Boolean]("play-json-formats",
       "Specifies if play JSON formats should be created.")
@@ -135,7 +134,10 @@ object SbtJsonPlugin extends AutoPlugin {
         jsonUrls.value,
         playJsonFormats.value,
         ignoreEmptyArrays.value)
-        .fold(err => streams.value.log.error(mkMessage(err)), _ => ())
+        .fold(
+          err => throw new Exception(mkMessage(err)),
+          files => files
+        )
     }
   )
 }
