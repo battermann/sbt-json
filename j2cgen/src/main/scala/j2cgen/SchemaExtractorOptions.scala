@@ -29,4 +29,9 @@ object SchemaExtractorOptions {
       case _ => true
     })
   }
+
+  implicit class IncludeOptions(include: Include) {
+    def exceptEmptyArrays = SchemaExtractorOptions.exceptEmptyArrays(include)
+    def exceptNullValues = SchemaExtractorOptions.exceptNullValues(include)
+  }
 }

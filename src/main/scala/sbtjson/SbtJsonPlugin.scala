@@ -6,6 +6,7 @@ import cats.implicits._
 import j2cgen.{CaseClassGenerator, CaseClassToStringInterpreter, SchemaExtractorOptions}
 import j2cgen.SchemaExtractorOptions._
 import ErrorMessages._
+import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models.json._
 import sbt.Keys._
 import sbt._
@@ -18,15 +19,15 @@ object SbtJsonPlugin extends AutoPlugin {
 
   private def generateCaseClassSources(
     src: File,
-    createPlayJsonFormats: Boolean,
-    ignoreEmptyArrays: Boolean) = {
+    interpreter: Interpreter,
+    include: Include) = {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
     sourceFiles.toList.map { file =>
       val srcFile = src / file
       val name = file.take(file lastIndexOf '.')
       val json = Source.fromFile(srcFile).getLines.mkString
-      CaseClassGenerator.generate(include = include(ignoreEmptyArrays),
-        interpreter = interpreter(createPlayJsonFormats))(json.toJsonString, name.capitalize.toRootTypeName)
+      CaseClassGenerator.generate(include = include, interpreter = interpreter)(json.toJsonString,
+        name.capitalize.toRootTypeName)
         .map(source => (name, source))
         .leftMap(err => CaseClassSourceGenFailure(err))
     }
@@ -35,14 +36,14 @@ object SbtJsonPlugin extends AutoPlugin {
 
   private def generateCaseClassSourceFromUrls(
     urls: Seq[String],
-    createPlayJsonFormats: Boolean,
-    ignoreEmptyArrays: Boolean) = {
+    interpreter: Interpreter,
+    include: Include) = {
     urls.toList.map { url =>
       Http.request(url)
         .flatMap { json =>
           val name = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
-          CaseClassGenerator.generate(include = include(ignoreEmptyArrays),
-            interpreter = interpreter(createPlayJsonFormats))(json.toJsonString, name.capitalize.toRootTypeName)
+          CaseClassGenerator.generate(include = include,
+            interpreter = interpreter)(json.toJsonString, name.capitalize.toRootTypeName)
             .map(source => (name, source))
             .leftMap(err => CaseClassSourceGenFailure(err))
         }
@@ -50,33 +51,15 @@ object SbtJsonPlugin extends AutoPlugin {
       .sequenceU
   }
 
-  private def include(ignoreEmptyArrays: Boolean) = {
-    if (ignoreEmptyArrays) {
-      SchemaExtractorOptions.exceptEmptyArrays(SchemaExtractorOptions.includeAll)
-    } else {
-      SchemaExtractorOptions.includeAll
-    }
-  }
-
-  private def interpreter(createPlayJsonFormats: Boolean) = {
-    val interpreter =
-      if (createPlayJsonFormats) {
-        CaseClassToStringInterpreter.interpretWithPlayJsonFormats _
-      } else {
-        CaseClassToStringInterpreter.interpret _
-      }
-    interpreter
-  }
-
   private def generateSourceFiles(
     src: File,
     dst: File,
     urls: Seq[String],
-    createPlayJsonFormats: Boolean,
-    ignoreEmptyArrays: Boolean) = {
+    interpreter: Interpreter,
+    include: Include) = {
     for {
-      fromFiles <- generateCaseClassSources(src, createPlayJsonFormats, ignoreEmptyArrays)
-      fromUrls <- generateCaseClassSourceFromUrls(urls, createPlayJsonFormats, ignoreEmptyArrays)
+      fromFiles <- generateCaseClassSources(src, interpreter, include)
+      fromUrls <- generateCaseClassSourceFromUrls(urls, interpreter, include)
     } yield {
       val sources = fromUrls ++ fromFiles
       if (sources.nonEmpty) dst.mkdirs()
@@ -99,10 +82,10 @@ object SbtJsonPlugin extends AutoPlugin {
     lazy val printJsonModels: TaskKey[Unit] = TaskKey[Unit]("print-json-models", "Prints the generated JSON models.")
     lazy val generateJsonModels: TaskKey[Seq[File]] = TaskKey[Seq[File]]("generate-json-models",
       "Generates JSON model case classes.")
-    lazy val playJsonFormats: SettingKey[Boolean] = SettingKey[Boolean]("play-json-formats",
-      "Specifies if play JSON formats should be created.")
-    lazy val ignoreEmptyArrays: SettingKey[Boolean] = SettingKey[Boolean]("ignore-empty-arrays",
-      "Specifies if empty arrays should be ignored.")
+    lazy val jsonInterpreter: SettingKey[Interpreter] = SettingKey[Interpreter]("json-interpreter",
+      "Specifies which interpreter to use to generate case class source.")
+    lazy val includeJsValues: SettingKey[Include] = SettingKey[Include]("include",
+      "Specifies if null values or empty arrays should be ignored.")
     lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File]("json-source-directory",
       "Path containing .JSON files.")
     lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]]("json-urls", "Urls that serve JSON data.")
@@ -111,16 +94,15 @@ object SbtJsonPlugin extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings = Seq(
-    playJsonFormats := true,
     jsonSourcesDirectory := baseDirectory.value / "src" / "main" / "resources" / "json",
     jsonUrls := Nil,
-    ignoreEmptyArrays := false,
+    includeJsValues := SchemaExtractorOptions.includeAll,
+    jsonInterpreter := CaseClassToStringInterpreter.interpret,
     printJsonModels := {
 
       val result = for {
-        fromFiles <- generateCaseClassSources(jsonSourcesDirectory.value, playJsonFormats.value,
-          ignoreEmptyArrays.value)
-        fromUrls <- generateCaseClassSourceFromUrls(jsonUrls.value, playJsonFormats.value, ignoreEmptyArrays.value)
+        fromFiles <- generateCaseClassSources(jsonSourcesDirectory.value, jsonInterpreter.value, includeJsValues.value)
+        fromUrls <- generateCaseClassSourceFromUrls(jsonUrls.value, jsonInterpreter.value, includeJsValues.value)
       } yield fromFiles ++ fromUrls
 
       result.fold(err => streams.value.log.error(mkMessage(err)), _.foreach(s => streams.value.log.info(s._2)))
@@ -132,8 +114,8 @@ object SbtJsonPlugin extends AutoPlugin {
         jsonSourcesDirectory.value,
         genSourceDir,
         jsonUrls.value,
-        playJsonFormats.value,
-        ignoreEmptyArrays.value)
+        jsonInterpreter.value,
+        includeJsValues.value)
         .fold(
           err => throw new Exception(mkMessage(err)),
           files => files
