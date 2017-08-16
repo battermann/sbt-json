@@ -16,7 +16,7 @@ object CaseClassGenerator {
   def generate(
     include: Include = SchemaExtractorOptions.includeAll,
     suffix: Suffix = tag[SuffixTag][String]("Model"),
-    interpreter: Interpreter = CaseClassToStringInterpreter.interpret)
+    interpreter: Interpreter = CaseClassToStringInterpreter.interpretWithPlayJsonFormats)
     (
       jsonString: JsonString,
       root: RootTypeName,
