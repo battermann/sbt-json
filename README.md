@@ -2,6 +2,8 @@
 
 A sbt plugin for generating Scala case class sources for deserialization of raw json e.g. from API responses.
 
+The plugin makes it possible to access JSON documents in a statically typed way including auto-completion. It takes a sample JSON document as input (either from a file or a URL) and generates Scala types that can be used to read data with the same structure.
+
 sbt-json integrates very well with the [play-json library](https://github.com/playframework/play-json) as it can also generate play-json formats for implicit conversion of a `JsValue` to its Scala representation.
 
 ## Installation
@@ -32,6 +34,11 @@ Also add the `generateJsonModels` task to the `sourceGenerators` and the play-js
       )
       
 ## Settings
+
+
+By default the plugin analyzes all files in `src/main/resources/json` with a .json extension and generates Scala case classes that represent the corresponding JSON schema.
+
+
 
 | name     | default | description |
 | -------- | ------- | ----------- |
