@@ -18,18 +18,11 @@ For now the plugin has to be declared as an [external source dependency](http://
 
 Edit the `build.sbt` file to enable the plugin and to generate case class sources whenever the compile task is executed:
 
-    lazy val root = (project in file("."))
-      .enablePlugins(SbtJsonPlugin)
-      ...
+     enablePlugins(SbtJsonPlugin)
 
-Also add the `generateJsonModels` task to the `sourceGenerators` and the play-json library:
+Add the play-json library dependency:
 
-    lazy val root = (project in file("."))
-      .enablePlugins(SbtJsonPlugin)
-      .settings(
-        libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0",
-        sourceGenerators in Compile += (generateJsonModels in Compile)
-      )
+    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
       
 ## Settings
 
@@ -39,6 +32,8 @@ Also add the `generateJsonModels` task to the `sourceGenerators` and the play-js
 | includeJsValues     | `includeAll`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays` |
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the JSON data to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
+| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(("<package_name>", "<class_name>", "<field_name>"))` |
+
 
 ## Example
 
