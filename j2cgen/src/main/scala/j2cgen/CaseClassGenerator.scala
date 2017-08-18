@@ -7,16 +7,15 @@ import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models.caseClassSource.CaseClassSource
 import j2cgen.models.json.JsonString
 import j2cgen.models.suffix.{Suffix, SuffixTag}
-import j2cgen.models.{CaseClass, CaseClassGenerationFailure, SchemaNameGenerator}
+import j2cgen.models.{CaseClassGenerationFailure, SchemaNameGenerator}
 import shapeless.tag
-import SchemaExtractorOptions._
 
 object CaseClassGenerator {
 
   def generate(
     include: Include = SchemaExtractorOptions.includeAll,
     suffix: Suffix = tag[SuffixTag][String]("Model"),
-    interpreter: Interpreter = CaseClassToStringInterpreter.interpretWithPlayJsonFormats)
+    interpreter: Interpreter = CaseClassToStringInterpreter.interpret)
     (
       jsonString: JsonString,
       root: RootTypeName,
