@@ -22,7 +22,7 @@ object Http {
           connectTimeout: Int = 5000,
           readTimeout: Int = 5000,
           requestMethod: String = "GET") = {
-    import java.net.{URL, HttpURLConnection}
+    import java.net.{HttpURLConnection, URL}
     val connection = new URL(url).openConnection.asInstanceOf[HttpURLConnection]
     connection.setConnectTimeout(connectTimeout)
     connection.setReadTimeout(readTimeout)

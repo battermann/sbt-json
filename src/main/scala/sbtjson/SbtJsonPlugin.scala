@@ -3,14 +3,14 @@ package sbtjson
 import java.io.File
 
 import cats.implicits._
-import j2cgen.{CaseClassGenerator, CaseClassToStringInterpreter, SchemaExtractorOptions}
 import j2cgen.SchemaExtractorOptions._
-import ErrorMessages._
 import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models.json._
+import j2cgen.{CaseClassGenerator, CaseClassToStringInterpreter, SchemaExtractorOptions}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
+import sbtjson.ErrorMessages._
 
 import scala.io.Source
 
@@ -120,7 +120,8 @@ object SbtJsonPlugin extends AutoPlugin {
           err => throw new Exception(mkMessage(err)),
           files => files
         )
-    }
+    },
+    sourceGenerators in Compile += (generateJsonModels in Compile)
   )
 }
 
