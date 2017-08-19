@@ -302,7 +302,7 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
         southwest: Location
     )
 
-*Todo: fix order of play-json formats*
+*Todo: fix order of play-json formats (see: [issue](https://github.com/battermann/sbt-json/issues/2))*
 
 ## Tasks
 
