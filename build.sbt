@@ -1,6 +1,6 @@
 
 lazy val commonSettings = Seq(
-  version in ThisBuild := "0.2.0",
+  version in ThisBuild := "0.2.1",
   organization in ThisBuild := "<INSERT YOUR ORG HERE>",
   scalaVersion := "2.10.6"
 )
