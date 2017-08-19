@@ -1,0 +1,8 @@
+{
+  "value1": {
+    "foo": { "value": 42 }
+  },
+  "value2": {
+    "foo": { "value": "some string" }
+  }
+}
