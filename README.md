@@ -141,7 +141,7 @@ Here the `message` field of the `Fbpost` case class is actually optional as some
 
 To fix this, the field has to be marked as optional. Add the following line to the `build.sbt` file:
 
-    jsonOptionals := Seq(("fbpost", "Fbpost", "message"))
+    jsonOptionals += ("fbpost", "Fbpost", "message")
 
 Run `reload` in the sbt console and then `printJsonModels` again:
 
