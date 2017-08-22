@@ -1,0 +1,19 @@
+{
+  "geometry": {
+    "location": {
+      "lat": 37.42291810,
+      "lng": -122.08542120
+    },
+    "location_type": "ROOFTOP",
+    "viewport": {
+      "northeast": {
+        "lat": 37.42426708029149,
+        "lng": -122.0840722197085
+      },
+      "southwest": {
+        "lat": 37.42156911970850,
+        "lng": -122.0867701802915
+      }
+    }
+  }
+}

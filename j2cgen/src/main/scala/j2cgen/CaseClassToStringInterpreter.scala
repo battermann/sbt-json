@@ -20,10 +20,39 @@ object CaseClassToStringInterpreter {
     caseClassSource.toCaseClassSource
   }
 
+  private def sortForPlayJsonFormats(caseClasses: Seq[CaseClass]): Seq[CaseClass] = {
+    def sort(unordered: Seq[CaseClass], ordered: Seq[CaseClass]): Seq[CaseClass] = {
+      unordered match {
+        case h :: t =>
+          if(hasNoUnresolvedDependencies(ordered, h)) {
+            sort(t, ordered ++ Seq(h))
+          } else {
+            sort(t ++ Seq(h), ordered)
+          }
+        case Nil =>
+          ordered
+      }
+    }
+
+    sort(caseClasses, Nil)
+  }
+
+  private def hasNoUnresolvedDependencies(alreadyDefined: Seq[CaseClass], caseClass: CaseClass) = {
+    val CaseClass(_, _, fields) = caseClass
+
+    fields.forall {
+      case (_, ScalaObject(_, dependencyName)) =>
+        alreadyDefined.exists {
+          case CaseClass(_, name, _) => name == dependencyName
+        }
+      case _ => true
+    }
+  }
+
+
   private def createCompanionObjectWithPlayJsonFormats(caseClasses: Seq[CaseClass]): String = {
     val formats =
-      caseClasses
-        .reverse
+      sortForPlayJsonFormats(caseClasses)
         .map(o => s"  implicit val format${o.name} = Json.format[${o.name}]")
         .mkString("\n")
 
@@ -41,7 +70,7 @@ object CaseClassToStringInterpreter {
       s"$fieldName: ${typeName(fieldType)}"
     }
 
-    s"case class $name(\n  ${members.mkString(",\n  ")}\n)"
+    s"case class $name(${members.map(m => s"\n  $m").mkString(",")}\n)"
   }
 
   private def typeName(scalaType: ScalaType): String = {
