@@ -1,6 +1,6 @@
 # sbt-json
 
-A sbt plugin for generating Scala case class sources for deserialization of raw json e.g. from API responses.
+sbt-json is an sbt plugin that generates Scala case classes for easy and implicit access of JSON data e.g. from API responses.
 
 The plugin makes it possible to access JSON documents in a statically typed way including auto-completion. It takes a sample JSON document as input (either from a file or a URL) and generates Scala types that can be used to read data with the same structure.
 
@@ -56,7 +56,7 @@ Then use play-json to read the JSON data:
 
 ### jsonInterpreter
 
-The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two interpreter functions available, `interpretWithPlayJsonFormats` (default) and `interpret`. This is the type of the interpreter function:
+The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two options for this setting available, `interpretWithPlayJsonFormats` (default) and `interpret`. The type of the interpreter function is:
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
@@ -72,9 +72,11 @@ By default the code generation will fail if the JSON sample contains empty array
 
 To change this behavior you can set `includeJsValues` to ignore empty arrays or null values. The type of this setting is `type Include = JsValue => Boolean` and there are two combinators available as well as a convenient syntax (implicit classes).
 
-Import `j2cgen.SchemaExtractorOptions._`.
+Add this import statement to the `build.sbt`:
 
-Specify to ignore empty arrays:
+    import j2cgen.SchemaExtractorOptions._
+
+Configure this setting to ignore empty arrays:
 
     includeJsValues := includeAll.exceptEmptyArrays
 
@@ -100,11 +102,11 @@ By default all files with a `.json` extension in the directory `src/main/resourc
 
 ### jsonOptionals
 
-If the JSON documents contain optional fields they have to be explicitly marked as such. To do this, add a tuple containing the package name, class name and field name to the `jsonOptionals` setting.
+If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a tuple containing the package name, class name, and field name to the `jsonOptionals` setting.
 
 #### Example
 
-JSON document of a facebook post provided for analyzation:
+Place a file `fbpost.json` containng a JSON document of a facebook post inside the json-sources directory:
 
     {
         "id":"339880699398622_241628669274112",
@@ -113,7 +115,7 @@ JSON document of a facebook post provided for analyzation:
         "full_picture":"https:\/\/scontent.xx.fbcdn.net\/v\/t31.0-8\/s720x720\/177827_10151014484731203_401775304_o.jpg?oh=69db574b81ebe6bfe97a4077b6806775&oe=5A25DA17"
     }
 
-Running sbt task `printJsonModels` will output the generated Scala case classes:
+You can inspect the result of the code generation by running the sbt-json task `printJsonModels`:
 
     [info] /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
     [info] package models.json.fbpost
@@ -131,7 +133,7 @@ Running sbt task `printJsonModels` will output the generated Scala case classes:
     [info]   implicit val formatFbpost = Json.format[Fbpost]
     [info] }
 
-Here the `message` field of the `Fbpost` case class is actually optional as some posts do not contain a message field. Implicit decoding of a JSON document like this will fail:
+Here the type of the `message` field is `String`. However, some facebook posts do not contain a message field. Implicit decoding of a JSON document like this will fail:
 
     {
         "id":"339880699398622_371821532871205",
@@ -141,9 +143,9 @@ Here the `message` field of the `Fbpost` case class is actually optional as some
 
 To fix this, the field has to be marked as optional. Add the following line to the `build.sbt` file:
 
-    jsonOptionals := Seq(("fbpost", "Fbpost", "message"))
+    jsonOptionals += ("fbpost", "Fbpost", "message")
 
-Run `reload` in the sbt console and then `printJsonModels` again:
+Run `reload` in the sbt console and inspect the generated code again with `printJsonModels`. The `message` field is now of type `Option[String]`:
 
     [info] /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
     [info] package models.json.fbpost
@@ -163,13 +165,13 @@ Run `reload` in the sbt console and then `printJsonModels` again:
 
 ## Code generation features
 
-### Unify type of array of similar JSON objects
+### Unification of array types of similar JSON objects
 
-If the JSON objects of an array are not consistent, the generator will unify the type by making all fields that are not shared by all objects optional.
+If the JSON objects of an array are not consistent, the generator will unify the type by making all fields optional that are not shared by all objects.
 
 #### Example
 
-In this sample of facebook posts `message` and `full_picture` will be optional in the generated case classes:
+The fields `message` and `full_picture` of the generated case class will be optional for this sample JSON document:
 
     {
         "posts":{
@@ -260,7 +262,7 @@ The generator tries to avoid Scala reserved words and type names by appending th
 
 ### Unify type with exact same structure
 
-If an objects has the exact same structure as a type that was generated before, it will be substituted by that type.
+If an objects schema has the exact same structure as a schema that was found before, it will be substituted by that schema.
 
     {
         "geometry": {
@@ -281,7 +283,7 @@ If an objects has the exact same structure as a type that was generated before, 
         }
     }
 
-Note that there are no case classes `Northeast` and `Southwest` generated. Instead the type of the fields will be defined as `Location`:
+Note that there are no case classes `Northeast` and `Southwest` generated. Instead the type of the fields will be declared as `Location`:
 
     case class Geo(
         geometry: Geometry
@@ -302,11 +304,11 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
         southwest: Location
     )
 
-*Todo: fix order of play-json formats*
+Note: There used to be an issue with the order of play-json formats in the above scenario which has been resolved in this version. (See: [issue](https://github.com/battermann/sbt-json/issues/2)).
 
 ## Tasks
 
 | name     | description |
 | -------- | ----------- |
 | printJsonModels | Prints the generated case classes to the console. |
-| generateJsonModels | Generates case classes. |
+| generateJsonModels | Creates source files containing the generates case classes. |
