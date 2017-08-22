@@ -60,4 +60,14 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
 
     list.list shouldEqual Seq(1, 2, 3)
   }
+
+  "Generated code from JSON document with values of the same schema" should "contain only a single representation of the schema and correct order of play-json formats" in {
+    import models.json.geo._
+
+    val json = JsonFile.readeJsonFile("geo")
+
+    val geo = Json.parse(json).as[Geo]
+
+    geo.geometry.viewport.northeast.lat shouldBe 37.42426708029149
+  }
 }

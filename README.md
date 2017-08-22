@@ -303,8 +303,8 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
         northeast: Location,
         southwest: Location
     )
-    
-Currently this still causes a problem with the generated play-json formats, as they appear in the wrong order (see: [issue](https://github.com/battermann/sbt-json/issues/2)).
+
+Note: There used to be an issue with the order of play-json formats in the above scenario which has been resolved in this version. (See: [issue](https://github.com/battermann/sbt-json/issues/2)).
 
 ## Tasks
 
