@@ -12,11 +12,10 @@ object SchemaToCaseClassConverter {
     Right[CaseClassGenerationFailure, Seq[SchemaObject]](findAllSObjects(schema))
       .ensure(JsonContainsNoObjects)(_.nonEmpty)
       .map(removeDuplicates)
-      .map(_.map(sObjectToCaseClass))
+      .map(_.map(schemaObjectToCaseClass))
   }
 
   private def findAllSObjects(schema: Schema): Seq[SchemaObject] = {
-
     def findRecursively(schema: Schema, acc: Seq[SchemaObject]): Seq[SchemaObject] = {
       schema match {
         case o@SchemaObject(_, _, fields) =>
@@ -35,14 +34,15 @@ object SchemaToCaseClassConverter {
     findRecursively(schema, Seq())
   }
 
-  private def removeDuplicates(sObjects: Seq[SchemaObject]): Seq[SchemaObject] = {
-    val duplicates = findDuplicates(sObjects)(o => o.id, Schema.haveSameStructure)
+  private def removeDuplicates(schemaObjects: Seq[SchemaObject]): Seq[SchemaObject] = {
+    val duplicates = findDuplicates(schemaObjects)(o => o.id, Schema.haveSameStructure)
 
-    sObjects
+    schemaObjects
       .filter(o => !duplicates.contains(o.id))
       .map {
         case o@SchemaObject(_, _, fields) =>
-          val xs = fields.map { case (fieldName, fieldSchema) =>
+          val xs = fields.map {
+            case (fieldName, fieldSchema) =>
             fieldSchema match {
               case SchemaObject(otherId, _, _) =>
                 (fieldName, duplicates.getOrElse(otherId, fieldSchema))
@@ -54,11 +54,11 @@ object SchemaToCaseClassConverter {
       }
   }
 
-  private def sObjectToCaseClass(sObject: SchemaObject): CaseClass = {
-    sObject match {
+  private def schemaObjectToCaseClass(schemaObject: SchemaObject): CaseClass = {
+    schemaObject match {
       case SchemaObject(id, name, fields) =>
         val caseClassFields = fields.map {
-          case (fName, schema) => (fName.toClassFieldName, schemaToScalaType(schema))
+          case (fieldName, schema) => (fieldName.toClassFieldName, schemaToScalaType(schema))
         }
         CaseClass(id.toClassId, name.toClassName, caseClassFields)
     }

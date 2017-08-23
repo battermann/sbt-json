@@ -26,9 +26,7 @@ object CaseClassManipulator {
 
   private def findAlternativeNames(
     makeUnique: (Set[String], ClassName) => Option[ClassName],
-    caseClasses: Seq[CaseClass]): Map[UUID, ClassName]
-
-  = {
+    caseClasses: Seq[CaseClass]): Map[UUID, ClassName] = {
     def alternativeNamesRec(
       ccs: Seq[CaseClass],
       alreadyReservedNames: Set[String],
@@ -49,9 +47,7 @@ object CaseClassManipulator {
     alternativeNamesRec(caseClasses, Set(), Map())
   }
 
-  private def rename(caseClasses: Seq[CaseClass], alternativeNames: Map[UUID, ClassName]): Seq[CaseClass]
-
-  = {
+  private def rename(caseClasses: Seq[CaseClass], alternativeNames: Map[UUID, ClassName]): Seq[CaseClass] = {
     def renameFieldTypes(fields: Seq[(ClassFieldName, ScalaType)]) = {
       fields.map {
         case f@(fName, ScalaObject(id, _)) =>

@@ -33,8 +33,8 @@ object SchemaExtractor {
     fields: List[(String, JsValue)]): Either[CaseClassGenerationFailure, Schema] = {
     fields
       .filter { case (_, value) => include(value) }
-      .map { case (vName, value) =>
-        extractSchemaFromJsValue(include, nameGenerator, vName, value)
+      .map { case (fieldName, value) =>
+        extractSchemaFromJsValue(include, nameGenerator, fieldName, value)
       }
       .sequenceU
       .map(schemaFields => SchemaObject(UUID.randomUUID().toSchemaObjectId, nameGenerator.genClassName(name),
@@ -56,7 +56,7 @@ object SchemaExtractor {
       case JsBoolean(_) =>
         Right(SchemaBoolean)
       case JsObject(fields) =>
-        extractSchemaFromJsObjectFields(include, nameGenerator, name.capitalize, fields.toList)
+        extractSchemaFromJsObjectFields(include, nameGenerator, name, fields.toList)
       case JsArray(values) =>
         extractSchemaFromArray(include, nameGenerator, name, values)
     }
@@ -89,7 +89,7 @@ object SchemaExtractor {
         Right(SchemaArray(first))
       } else if (schemas forall isObject) {
         val schema = SchemaObject(UUID.randomUUID().toSchemaObjectId, nameGenerator.genClassName(name),
-          harmonize(schemas))
+          unify(schemas))
         Right(SchemaArray(schema))
       } else {
         Left(ArrayTypeNotConsistent)
@@ -97,7 +97,7 @@ object SchemaExtractor {
     } yield schema
   }
 
-  private def harmonize(schemas: Seq[Schema]): Seq[(SchemaFieldName, Schema)] = {
+  private def unify(schemas: Seq[Schema]): Seq[(SchemaFieldName, Schema)] = {
     def containsField(t: Schema, field: (String, Schema)) = {
       t match {
         case SchemaObject(_, _, xs) =>
@@ -107,7 +107,7 @@ object SchemaExtractor {
     }
 
     val allFields = schemas.flatMap {
-      case SchemaObject(_, _, xs) => xs
+      case SchemaObject(_, _, fields) => fields
       case _ => Nil
     }
 

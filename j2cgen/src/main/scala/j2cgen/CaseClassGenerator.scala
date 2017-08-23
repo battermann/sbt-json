@@ -29,8 +29,8 @@ object CaseClassGenerator {
     for {
       jsValue <- JsonParser.parse(jsonString)
       schema <- SchemaExtractor.extractSchemaFromJsonRoot(include, nameGenerator, jsValue, root)
-      sObjects <- SchemaToCaseClassConverter.convert(schema)
-      renamed = CaseClassManipulator.rename(CaseClassNameGenerator.makeUnique, sObjects)
+      caseClasses <- SchemaToCaseClassConverter.convert(schema)
+      renamed = CaseClassManipulator.rename(CaseClassNameGenerator.makeUnique, caseClasses)
       withOptionals = CaseClassManipulator.addOptionals(renamed, optionals)
     } yield interpreter(withOptionals)
   }
