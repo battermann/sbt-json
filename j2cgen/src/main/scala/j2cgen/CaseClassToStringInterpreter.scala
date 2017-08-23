@@ -53,7 +53,7 @@ object CaseClassToStringInterpreter {
   private def createCompanionObjectWithPlayJsonFormats(caseClasses: Seq[CaseClass]): String = {
     val formats =
       sortForPlayJsonFormats(caseClasses)
-        .map(o => s"  implicit val format${o.name} = Json.format[${o.name}]")
+        .map(caseClass => s"  implicit val format${caseClass.name} = Json.format[${caseClass.name}]")
         .mkString("\n")
 
     s"""object ${caseClasses.head.name} {

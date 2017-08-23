@@ -2,9 +2,9 @@ package j2cgen
 
 import java.util.UUID
 
-import j2cgen.models.{CaseClass, ScalaObject}
 import j2cgen.models.CaseClass._
 import j2cgen.models.ScalaType._
+import j2cgen.models.{CaseClass, ScalaObject}
 import org.scalatest._
 
 class CaseClassToStringInterpreterTests extends FlatSpec with Matchers {

@@ -10,9 +10,9 @@ object Http {
       Right(executeRequest(url, connectTimeout, readTimeout, requestMethod))
     } catch {
       case ex: java.io.IOException =>
-        Left(NetworkFailure(ex))
+        Left(NetworkFailure(url, ex))
       case ex: java.net.SocketTimeoutException =>
-        Left(HttpTimeout(ex))
+        Left(HttpTimeout(url, ex))
     }
   }
 

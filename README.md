@@ -312,3 +312,7 @@ Note: There used to be an issue with the order of play-json formats in the above
 | -------- | ----------- |
 | printJsonModels | Prints the generated case classes to the console. |
 | generateJsonModels | Creates source files containing the generates case classes. |
+
+## Contributing
+
+Contributions are very welcome and highly appreciated. You can contribute by sending pull request, by reporting bugs and feature requests [here](https://github.com/battermann/sbt-json/issues), or by giving feedback and suggestions for improvement.

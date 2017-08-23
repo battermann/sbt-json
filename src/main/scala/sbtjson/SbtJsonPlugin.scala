@@ -32,7 +32,7 @@ object SbtJsonPlugin extends AutoPlugin {
       CaseClassGenerator.generate(include = include, interpreter = interpreter)(json.toJsonString,
         name.capitalize.toRootTypeName, getOptionals(optionals, name))
         .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name)))
-        .leftMap(err => CaseClassSourceGenFailure(err))
+        .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
     }
       .sequenceU
   }
@@ -50,7 +50,7 @@ object SbtJsonPlugin extends AutoPlugin {
             interpreter = interpreter)(json.toJsonString, name.capitalize.toRootTypeName,
             getOptionals(optionals, name))
             .map(source => (name, addHeaderAndPackage(source, name)))
-            .leftMap(err => CaseClassSourceGenFailure(err))
+            .leftMap(err => CaseClassSourceGenFailure(url, err))
         }
     }
       .sequenceU
