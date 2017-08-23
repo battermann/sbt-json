@@ -34,7 +34,10 @@ object SchemaExtractor {
     fields
       .filter { case (_, value) => include(value) }
       .map { case (fieldName, value) =>
-        extractSchemaFromJsValue(include, nameGenerator, fieldName, value)
+        extractSchemaFromJsValue(include, nameGenerator, fieldName, value).leftMap {
+          case ValueIsNull(_) => ValueIsNull(s"$name.$fieldName")
+          case other => other
+        }
       }
       .sequenceU
       .map(schemaFields => SchemaObject(UUID.randomUUID().toSchemaObjectId, nameGenerator.genClassName(name),
@@ -48,7 +51,7 @@ object SchemaExtractor {
     value: JsValue): Either[CaseClassGenerationFailure, (String, Schema)] = {
     val schemaOrError = value match {
       case JsNull =>
-        Left(ValueIsNull)
+        Left(ValueIsNull(name))
       case JsString(_) =>
         Right(SchemaString)
       case JsNumber(_) =>
@@ -84,7 +87,7 @@ object SchemaExtractor {
 
     for {
       schemas <- schemasOrError
-      first <- schemas.headOption.toRight(ArrayEmpty)
+      first <- schemas.headOption.toRight(ArrayEmpty(name))
       schema <- if (schemas forall (_ == first)) {
         Right(SchemaArray(first))
       } else if (schemas forall isObject) {
@@ -92,7 +95,7 @@ object SchemaExtractor {
           unify(schemas))
         Right(SchemaArray(schema))
       } else {
-        Left(ArrayTypeNotConsistent)
+        Left(ArrayTypeNotConsistent(name))
       }
     } yield schema
   }

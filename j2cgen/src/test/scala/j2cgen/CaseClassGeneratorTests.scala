@@ -256,7 +256,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
 
     val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
 
-    val expected = Left(ArrayEmpty)
+    val expected = Left(ArrayEmpty("R00t"))
 
     resultOrError shouldEqual expected
   }
