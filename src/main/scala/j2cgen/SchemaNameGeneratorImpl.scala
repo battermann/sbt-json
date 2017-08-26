@@ -1,7 +1,7 @@
 package j2cgen
 
 import j2cgen.models.Schema._
-import j2cgen.models.suffix.Suffix
+import j2cgen.models.suffix._
 
 object SchemaNameGeneratorImpl {
 

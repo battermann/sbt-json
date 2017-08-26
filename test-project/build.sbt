@@ -1,5 +1,5 @@
-import j2cgen.CaseClassToStringInterpreter._
 import j2cgen.SchemaExtractorOptions._
+import j2cgen.CaseClassToStringInterpreter._
 
 enablePlugins(SbtJsonPlugin)
 name := "test-project"

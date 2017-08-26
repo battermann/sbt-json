@@ -60,9 +60,9 @@ The `jsonInterpreter` setting specifies if [play-json formats](https://www.playf
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
-The interpreters are located in `j2cgen.CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
+The interpreters are located in `CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
 
-    import j2cgen.CaseClassToStringInterpreter._
+    import CaseClassToStringInterpreter._
 
     jsonInterpreter := interpretWithPlayJsonFormats
 
@@ -74,7 +74,7 @@ To change this behavior you can set `includeJsValues` to ignore empty arrays or 
 
 Add this import statement to the `build.sbt`:
 
-    import j2cgen.SchemaExtractorOptions._
+    import SchemaExtractorOptions._
 
 Configure this setting to ignore empty arrays:
 
