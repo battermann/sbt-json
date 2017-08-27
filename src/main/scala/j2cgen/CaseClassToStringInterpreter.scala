@@ -1,7 +1,7 @@
 package j2cgen
 
 import j2cgen.models._
-import j2cgen.models.caseClassSource.{CaseClassSource, _}
+import j2cgen.models.caseClassSource._
 
 object CaseClassToStringInterpreter {
 

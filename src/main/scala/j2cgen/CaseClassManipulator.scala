@@ -2,9 +2,9 @@ package j2cgen
 
 import java.util.UUID
 
-import j2cgen.models.CaseClass._
+import j2cgen.models.CaseClass.{ClassFieldName, ClassName}
 import j2cgen.models.ScalaType._
-import j2cgen.models._
+import j2cgen.models.{CaseClass, ScalaObject, ScalaOption, ScalaType}
 
 object CaseClassManipulator {
   def rename(makeUnique: (Set[String], ClassName) => Option[ClassName], caseClasses: Seq[CaseClass]): Seq[CaseClass] = {

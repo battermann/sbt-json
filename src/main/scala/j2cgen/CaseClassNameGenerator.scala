@@ -1,6 +1,6 @@
 package j2cgen
 
-import j2cgen.models.CaseClass.{ClassName, ToClassName}
+import j2cgen.models.CaseClass._
 
 object CaseClassNameGenerator {
   def makeUnique(reservedClassNames: Set[String], name: ClassName): Option[ClassName] = {

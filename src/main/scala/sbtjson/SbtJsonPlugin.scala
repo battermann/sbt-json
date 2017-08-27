@@ -3,11 +3,11 @@ package sbtjson
 import java.io.File
 
 import cats.implicits._
-import j2cgen.SchemaExtractorOptions._
-import j2cgen.models.CaseClass.{ClassFieldName, ClassName, _}
+import j2cgen.SchemaExtractorOptions.{Include, _}
+import j2cgen.{CaseClassGenerator, _}
+import j2cgen.models.CaseClass._
 import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models.json._
-import j2cgen.{CaseClassGenerator, CaseClassToStringInterpreter, SchemaExtractorOptions}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin

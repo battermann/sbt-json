@@ -2,9 +2,9 @@ package j2cgen
 
 import cats.implicits._
 import j2cgen.models.CaseClass._
-import j2cgen.models.ScalaType.{ToScalaObjectId, ToScalaObjectName}
+import j2cgen.models.ScalaType._
 import j2cgen.models._
-import util.CollectionUtils.findDuplicates
+import util.CollectionUtils._
 
 object SchemaToCaseClassConverter {
 

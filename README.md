@@ -8,21 +8,19 @@ sbt-json integrates very well with the [play-json library](https://github.com/pl
 
 ## Installation
 
-For now the plugin has to be declared as an [external source dependency](http://www.scala-sbt.org/0.13/docs/Plugins.html#1d%29+Project+dependency).
+Install the plugin according to the [sbt documentation](http://www.scala-sbt.org/0.13/docs/Using-Plugins.html).
 
 ### Edit `project/plugins.sbt`
 
-    lazy val root = (project in file(".")).dependsOn(sbtPlugin)
-
-    lazy val sbtPlugin = uri("git://github.com/battermann/sbt-json")
+    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.2.4")
 
 ### Edit `build.sbt`
 
 Edit the `build.sbt` file to enable the plugin and to generate case class sources whenever the compile task is executed:
 
-     enablePlugins(SbtJsonPlugin)
+    enablePlugins(SbtJsonPlugin)
 
-Add the play-json library dependency:
+If you want to use play-json add the play-json library dependency:
 
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
 
@@ -60,9 +58,9 @@ The `jsonInterpreter` setting specifies if [play-json formats](https://www.playf
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
-The interpreters are located in `j2cgen.CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
+The interpreters are located in `CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
 
-    import j2cgen.CaseClassToStringInterpreter._
+    import CaseClassToStringInterpreter._
 
     jsonInterpreter := interpretWithPlayJsonFormats
 
@@ -74,7 +72,7 @@ To change this behavior you can set `includeJsValues` to ignore empty arrays or 
 
 Add this import statement to the `build.sbt`:
 
-    import j2cgen.SchemaExtractorOptions._
+    import SchemaExtractorOptions._
 
 Configure this setting to ignore empty arrays:
 
@@ -258,7 +256,7 @@ The fields of the objects `value1` and `value2` have the same name (`foo`) but d
 
 ### Avoid Scala reserved words and type names
 
-The generator tries to avoid Scala reserved words and type names by appending the suffix `Model` to a class name that is a potential candidate to clash. E.g. `case class List()` will become `case class ListModel()`. (This feature is not yet fully tested and there is still no guaranty that there won't be any clashes.)
+The generator tries to avoid Scala reserved words and type names by appending the suffix `Model` to a class name that is a potential candidate to clash. E.g. `case class List()` will become `case class ListModel()`, or `case class MyClass(this: String)` will become ``case class MyClass(`this`: String)``. (This feature is not yet fully tested and there is still no guaranty that there won't be any clashes.)
 
 ### Unify type with exact same structure
 
