@@ -1,10 +1,14 @@
 # sbt-json
 
-sbt-json is an sbt plugin that generates Scala case classes for easy and implicit access of JSON data e.g. from API responses.
+sbt-json is an sbt plugin that generates Scala case classes for easy, statically typed, and implicit access of JSON data e.g. from API responses.
 
 The plugin makes it possible to access JSON documents in a statically typed way including auto-completion. It takes a sample JSON document as input (either from a file or a URL) and generates Scala types that can be used to read data with the same structure.
 
 sbt-json integrates very well with the [play-json library](https://github.com/playframework/play-json) as it can also generate play-json formats for implicit conversion of a `JsValue` to its Scala representation.
+
+## Prerequisites
+
+0.13.5 <= sbt version < 1.0
 
 ## Installation
 
