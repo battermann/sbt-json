@@ -306,8 +306,6 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
         southwest: Location
     )
 
-Note: There used to be an issue with the order of play-json formats in the above scenario which has been resolved in this version. (See: [issue](https://github.com/battermann/sbt-json/issues/2)).
-
 ## Tasks
 
 | name     | description |
