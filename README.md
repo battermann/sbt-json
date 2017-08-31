@@ -4,7 +4,9 @@ sbt-json is an sbt plugin that generates Scala case classes for easy, statically
 
 The plugin makes it possible to access JSON documents in a statically typed way including auto-completion. It takes a sample JSON document as input (either from a file or a URL) and generates Scala types that can be used to read data with the same structure.
 
-sbt-json integrates very well with the [play-json library](https://github.com/playframework/play-json) as it can also generate play-json formats for implicit conversion of a `JsValue` to its Scala representation.
+sbt-json integrates very well with the [play-json library](https://github.com/playframework/play-json) as it can also generate play-json formats for implicit conversion of a `JsValue` to its Scala representation. (see [example](https://github.com/battermann/sbt-json#play-json))
+
+sbt-json also works with [circe](https://circe.github.io/circe/) for many JSON schemas as circe automatically derives the necessary type classes for the generated types. (see [example](https://github.com/battermann/sbt-json#circe))
 
 ## Prerequisites
 
@@ -40,6 +42,8 @@ If you want to use play-json add the play-json library dependency:
 
 ## Example
 
+### play-json
+
 If you want to analyze JSON data form `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US` and ignore empty arrays, add the following lines to the `build.sbt` file:
 
     jsonUrls += "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
@@ -53,6 +57,49 @@ Then use play-json to read the JSON data:
     val json = Source.fromURL("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US").mkString
     val imageArchive = Json.parse(json).as[HPImageArchive]
     println(imageArchive.images.head.url)
+
+### circe
+
+sbt-json also works with [circe](https://circe.github.io/circe/) for many JSON schemas as circe automatically derives the necessary type classes for the generated types.
+
+In the `buld.sbt` add the circe dependencies:
+
+    val circeVersion = "0.8.0"
+
+    libraryDependencies ++= Seq(
+      "io.circe" %% "circe-core",
+      "io.circe" %% "circe-generic",
+      "io.circe" %% "circe-parser"
+    ).map(_ % circeVersion)
+    
+It is important to set the interpreter to not generate play-json formats:
+
+    jsonInterpreter := interpret
+    
+Now add a file or URL with the JSON sample, e.g.:
+
+    jsonUrls += "https://api.coindesk.com/v1/bpi/currentprice.json"
+    
+Use circe to decode the JSON data:
+
+      import io.circe.generic.auto._
+      import io.circe.parser._
+      import models.json.currentprice._
+
+      val url = "https://api.coindesk.com/v1/bpi/currentprice.json"
+      val rawJson = scala.io.Source.fromURL(url).mkString
+      val currentPriceOrError = decode[Currentprice](rawJson)
+      val output = currentPriceOrError fold (
+        err => err.getMessage,
+        currentPrice => {
+          val info = currentPrice.bpi.EUR.description
+          val priceInEuro = currentPrice.bpi.EUR.rate_float
+          val date = currentPrice.time.updated
+          s"Current Bitcoin price ($info): $priceInEuro (timestamp: $date)"
+        }
+      )
+
+      println(output)
 
 ## Settings in depth
 
