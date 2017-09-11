@@ -370,6 +370,12 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
 | printJsonModels | Prints the generated case classes to the console. |
 | generateJsonModels | Creates source files containing the generates case classes. |
 
+## Troubleshooting
+
+### Why is the generated code ignored by IntelliJ?
+
+If the generated code is ignored by the compiler, in the **Project** tool window include the folder `target/scala-{version}/src_managed/main` by selecting **Mark Directory as | Generated Source Root** through the context menu, as described [here](https://www.jetbrains.com/help/idea/configuring-content-roots.html#d85322e277).
+
 ## Contributing
 
 Contributions are very welcome and highly appreciated. You can contribute by sending pull request, by reporting bugs and feature requests [here](https://github.com/battermann/sbt-json/issues), or by giving feedback and suggestions for improvement.
