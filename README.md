@@ -2,33 +2,21 @@
 
 <!-- TOC -->
 
-- [Description](#description)
+- [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Settings](#settings)
 - [Examples](#example)
-    - [play-json](#play-json)
-    - [circe](#circe)
 - [Settings in depth](#settings-in-depth)
-    - [jsonInterpreter](#jsoninterpreter)
-    - [includeJsValues](#includejsvalues)
-    - [jsonSourcesDirectory](#jsonsourcesdirectory)
-    - [jsonUrls](#jsonurls)
-    - [jsonOptionals](#jsonoptionals)
 - [Code generation features](#code-generation-features)
-    - [Unification of array types of similar JSON objects](#unification-of-array-types-of-similar-json-objects)
-    - [Ensure unique names](#ensure-unique-names)
-    - [Avoid Scala reserved words and type names](#avoid-scala-reserved-words-and-type-names)
-    - [Unify type with exact same structure](#unify-type-with-exact-same-structure)
 - [Tasks](#tasks)
 - [Troubleshooting](#troubleshooting)
-    - [Why is the generated code ignored by IntelliJ?](#why-is-the-generated-code-ignored-by-intellij)
 - [Contributing](#contributing)
 
 <!-- /TOC -->
 
-## Description
+## Overview
 
 sbt-json is an sbt plugin that generates Scala case classes for easy, statically typed, and implicit access of JSON data e.g. from API responses.
 
