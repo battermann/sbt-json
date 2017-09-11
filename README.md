@@ -29,6 +29,16 @@ Edit the `build.sbt` file to enable the plugin and to generate case class source
 If you want to use play-json add the play-json library dependency:
 
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
+    
+## Usage
+
+After a successful installation place one or more `.json` files containing sample JSON documents in the directory `src/main/resources/json/`.
+
+By default play-json formats will be generated. If you don't use play-json in your project import `j2cgen.CaseClassToStringInterpreter._` and add `jsonInterpreter := interpret` to your `build.sbt` file and reload sbt.
+
+On compile, case classes will be generated in `target/scala-{version}/src_managed/main/compiled_json/models/json/{name}` where `name` will be the name of the corresponding `.json` file.
+
+To use the generated models, import `models.json.{name}._` in your application code. You can now map a JSON document that has the same schema as the sample JSON document (e.g. from an API response) to the generated models. This can be done implicitly e.g. with circe or with play-json (see examples below).
 
 ## Settings
 
@@ -74,7 +84,7 @@ In the `buld.sbt` add the circe dependencies:
     
 It is important to set the interpreter to not generate play-json formats:
 
-    jsonInterpreter := interpret
+    jsonInterpreter := j2cgen.CaseClassToStringInterpreter.interpret
     
 Now add a file or URL with the JSON sample, e.g.:
 
