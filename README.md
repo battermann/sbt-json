@@ -6,6 +6,7 @@
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Why use sbt-json?](#why-use-sbt-json)
 - [Settings](#settings)
 - [Examples](#example)
 - [Settings in depth](#settings-in-depth)
@@ -57,6 +58,20 @@ By default play-json formats will be generated. If you don't use play-json in yo
 On compile, case classes will be generated in `target/scala-{version}/src_managed/main/compiled_json/models/json/{name}` where `name` will be the name of the corresponding `.json` file.
 
 To use the generated models, import `models.json.{name}._` in your application code. You can now map a JSON document that has the same schema as the sample JSON document (e.g. from an API response) to the generated models. This can be done implicitly e.g. with circe or with play-json (see examples below).
+
+## Why use sbt-json?
+
+sbt-json supports easy, statically typed and implicit access to JSON data with minimal overhead and minimal boiler-plate.
+
+There are other online tools (e.g. [http://json2caseclass.cleverapps.io](http://json2caseclass.cleverapps.io) or [http://transform.now.sh/json-to-scala-case-class](https://transform.now.sh/json-to-scala-case-class)) that allow pasting a JSON string to generate Scala case classes which you can copy and paste back into your solution. But with sbt-json, once installed, you don't need an external tool. Moreover, the workflow of adding a new JSON schema involves less steps and the generated case classes do not need to be maintained.
+
+Additionally sbt-json handles a lot of edge cases that will cause problems when using the available online tools. For example:
+
+* Optional object fields will be recognized automatically for an array of a given objects
+* Derived class names will be unique
+* Scala reserved words will be avoided
+
+Another advantage of sbt-json is the optional generation of play-json formats that otherwise you would have to write manually.
 
 ## Settings
 
