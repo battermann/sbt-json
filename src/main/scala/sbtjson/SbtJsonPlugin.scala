@@ -18,7 +18,6 @@ import scala.io.Source
 object SbtJsonPlugin extends AutoPlugin {
   override def requires = JvmPlugin
 
-
   private def generateCaseClassSourcesFromFiles(
     src: File,
     interpreter: Interpreter,
@@ -29,7 +28,8 @@ object SbtJsonPlugin extends AutoPlugin {
       val srcFile = src / file
       val name = file.take(file lastIndexOf '.')
       val json = Source.fromFile(srcFile).getLines.mkString
-      CaseClassGenerator.generate(include = include, interpreter = interpreter)(json.toJsonString,
+      CaseClassGenerator.generate(include = include, interpreter = interpreter)(
+        json.toJsonString,
         name.capitalize.toRootTypeName, getOptionals(optionals, name))
         .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name)))
         .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
@@ -46,8 +46,10 @@ object SbtJsonPlugin extends AutoPlugin {
       Http.request(url)
         .flatMap { json =>
           val name = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
-          CaseClassGenerator.generate(include = include,
-            interpreter = interpreter)(json.toJsonString, name.capitalize.toRootTypeName,
+          CaseClassGenerator.generate(
+            include = include,
+            interpreter = interpreter)(
+            json.toJsonString, name.capitalize.toRootTypeName,
             getOptionals(optionals, name))
             .map(source => (name, addHeaderAndPackage(source, name)))
             .leftMap(err => CaseClassSourceGenFailure(url, err))
@@ -82,29 +84,39 @@ object SbtJsonPlugin extends AutoPlugin {
     s"""/** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
        |package $packageName
        |
-             |$generatedSource
+       |$generatedSource
        |"""
       .stripMargin
   }
 
   private def getOptionals(optionals: Map[String, Seq[(ClassName, ClassFieldName)]], packageName: String) = {
-    optionals.getOrElse(packageName.toLowerCase, Nil) ++ optionals.getOrElse(s"models.json.${packageName.toLowerCase}",
+    optionals.getOrElse(packageName.toLowerCase, Nil) ++ optionals.getOrElse(
+      s"models.json.${packageName.toLowerCase}",
       Nil)
   }
 
   object autoImport {
     lazy val printJsonModels: TaskKey[Unit] = TaskKey[Unit]("print-json-models", "Prints the generated JSON models.")
-    lazy val generateJsonModels: TaskKey[Seq[File]] = TaskKey[Seq[File]]("generate-json-models",
+    lazy val generateJsonModels: TaskKey[Seq[File]] = TaskKey[Seq[File]](
+      "generate-json-models",
       "Generates JSON model case classes.")
-    lazy val jsonInterpreter: SettingKey[Interpreter] = SettingKey[Interpreter]("json-interpreter",
+    lazy val jsonInterpreter: SettingKey[Interpreter] = SettingKey[Interpreter](
+      "json-interpreter",
       "Specifies which interpreter to use. `interpret` and `interpretWithPlayJsonFormats`")
-    lazy val includeJsValues: SettingKey[Include] = SettingKey[Include]("include",
+    lazy val includeJsValues: SettingKey[Include] = SettingKey[Include](
+      "include",
       "Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays`")
-    lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File]("json-source-directory",
+    lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File](
+      "json-source-directory",
       "Path containing the `.json` files to analyze.")
-    lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]]("json-urls", "List of urls that serve JSON data to be analyzed.")
+    lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]](
+      "json-urls", "List of urls that serve JSON data to be analyzed.")
     lazy val jsonOptionals: SettingKey[Seq[(String, String, String)]] = SettingKey[Seq[(String, String, String)]](
-      "json-optionals", "Specify which fields should be optional, e.g. `jsonOptionals := Seq((\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
+      "json-optionals",
+      "Specify which fields should be optional, e.g. `jsonOptionals := Seq((\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
+    lazy val packageName: SettingKey[String] = SettingKey[String](
+      "package-name", "Package name for the generated case classes.")
+    lazy val scalaSourceDir: SettingKey[File] = SettingKey[File]("scala-source-dir", "Path for generated case classes.")
   }
 
   import autoImport._
@@ -115,6 +127,8 @@ object SbtJsonPlugin extends AutoPlugin {
     includeJsValues := SchemaExtractorOptions.includeAll,
     jsonInterpreter := CaseClassToStringInterpreter.interpretWithPlayJsonFormats,
     jsonOptionals := Nil,
+    packageName := "jsonmodels",
+    scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
 
       val optionals = toOptionalsMap(jsonOptionals.value)
@@ -139,11 +153,10 @@ object SbtJsonPlugin extends AutoPlugin {
     generateJsonModels := {
 
       val optionals = toOptionalsMap(jsonOptionals.value)
-      val genSourceDir = sourceManaged.value / "main" / "compiled_json"
 
       generateSourceFiles(
         jsonSourcesDirectory.value,
-        genSourceDir,
+        scalaSourceDir.value,
         jsonUrls.value,
         jsonInterpreter.value,
         includeJsValues.value,
@@ -153,7 +166,8 @@ object SbtJsonPlugin extends AutoPlugin {
           files => files
         )
     },
-    sourceGenerators in Compile += (generateJsonModels in Compile)
+    sourceGenerators in Compile += (generateJsonModels in Compile),
+    managedSourceDirectories in Compile += (scalaSourceDir in Compile).value
   )
 
   private def toOptionalsMap(optionals: Seq[(String, String, String)]) = {
