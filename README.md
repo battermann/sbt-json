@@ -28,7 +28,7 @@ If you want to use play-json add the play-json library dependency:
 
 | name     | default | description |
 | -------- | ------- | ----------- |
-| jsonInterpreter | `interpretWithPlayJsonFormats`    | Specifies which interpreter to use. `interpret` and `interpretWithPlayJsonFormats` |
+| jsonInterpreter | `plainCaseClasses.withPlayJsonFormats`    | Combinator that specifies which interpreter to use. (`plainCaseClasses` can be combined with `withPlayJsonFormats`) |
 | includeJsValues     | `includeAll`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays` |
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the `.json` files to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
@@ -59,11 +59,13 @@ The `jsonInterpreter` setting specifies if [play-json formats](https://www.playf
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
-The interpreters are located in `CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
+The interpreters can be set like this in the `build.sbt` file:
 
-    import CaseClassToStringInterpreter._
+    jsonInterpreter := plainCaseClasses
+    
+or if play-json-formats should be generated:
 
-    jsonInterpreter := interpretWithPlayJsonFormats
+    jsonInterpreter := plainCaseClasses.withPlayJsonFormats
 
 ### includeJsValues
 

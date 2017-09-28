@@ -24,7 +24,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
     val foo = R00t("world")
     val jsonString = Json.toJson(foo)
 
-    val caseClassSource = generate(interpreter = interpretWithPlayJsonFormats)(jsonString.toString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(interpreter = plainCaseClasses.withPlayJsonFormats)(jsonString.toString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(

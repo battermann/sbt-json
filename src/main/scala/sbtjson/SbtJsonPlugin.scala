@@ -4,9 +4,11 @@ import java.io.File
 
 import cats.implicits._
 import j2cgen.SchemaExtractorOptions.{Include, _}
+import j2cgen.models.CaseClass
 import j2cgen.{CaseClassGenerator, _}
 import j2cgen.models.CaseClass._
 import j2cgen.models.Interpreter.Interpreter
+import j2cgen.models.caseClassSource.CaseClassSource
 import j2cgen.models.json._
 import sbt.Keys._
 import sbt._
@@ -127,6 +129,13 @@ object SbtJsonPlugin extends AutoPlugin {
       className: String,
       fieldName: String
     )
+
+    val plainCaseClasses: Interpreter = CaseClassToStringInterpreter.plainCaseClasses
+    val withPlayJsonFormats: Interpreter => Interpreter = CaseClassToStringInterpreter.withPlayJsonFormats
+
+    implicit class InterpreterOptions(interpreter: Interpreter) {
+      def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
+    }
   }
 
   import autoImport._
@@ -135,7 +144,7 @@ object SbtJsonPlugin extends AutoPlugin {
     jsonSourcesDirectory := baseDirectory.value / "src" / "main" / "resources" / "json",
     jsonUrls := Nil,
     includeJsValues := SchemaExtractorOptions.includeAll,
-    jsonInterpreter := CaseClassToStringInterpreter.interpretWithPlayJsonFormats,
+    jsonInterpreter := plainCaseClasses.withPlayJsonFormats,
     jsonOptionals := Nil,
     packageName := "jsonmodels",
     scalaSourceDir := sourceManaged.value / "compiled_json",
