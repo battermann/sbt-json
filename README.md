@@ -45,7 +45,7 @@ If you want to analyze JSON data form `https://www.bing.com/HPImageArchive.aspx?
 Then use play-json to read the JSON data:
 
     import play.api.libs.json.Json
-    import models.json.hpimagearchive._
+    import jsonmodels.hpimagearchive._
 
     val json = Source.fromURL("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US").mkString
     val imageArchive = Json.parse(json).as[HPImageArchive]
@@ -115,7 +115,7 @@ Place a file `fbpost.json` containng a JSON document of a facebook post inside t
 You can inspect the result of the code generation by running the sbt-json task `printJsonModels`:
 
     [info] /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-    [info] package models.json.fbpost
+    [info] package jsonmodels.fbpost
     [info] 
     [info] case class Fbpost(
     [info]   id: String,
@@ -145,7 +145,7 @@ To fix this, the field has to be marked as optional. Add the following line to t
 Run `reload` in the sbt console and inspect the generated code again with `printJsonModels`. The `message` field is now of type `Option[String]`:
 
     [info] /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-    [info] package models.json.fbpost
+    [info] package jsonmodels.fbpost
     [info] 
     [info] case class Fbpost(
     [info]   id: String,
@@ -195,7 +195,7 @@ The fields `message` and `full_picture` of the generated case class will be opti
 Generated case classes:
 
     /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-    package models.json.facebook
+    package jsonmodels.facebook
 
     case class Facebook(
         posts: Posts,
