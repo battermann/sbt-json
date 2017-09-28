@@ -131,7 +131,7 @@ object SbtJsonPlugin extends AutoPlugin {
     includeJsValues := SchemaExtractorOptions.includeAll,
     jsonInterpreter := CaseClassToStringInterpreter.interpretWithPlayJsonFormats,
     jsonOptionals := Nil,
-    packageName := "models.json",
+    packageName := "jsonmodels",
     scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
 
