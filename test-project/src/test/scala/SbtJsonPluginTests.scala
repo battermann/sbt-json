@@ -6,7 +6,7 @@ import scala.utils.JsonFile
 
 class SbtJsonPluginTests extends FlatSpec with Matchers {
   "JSON Object with one field" should "deserialized with correct field value" in {
-    import models.json.foo._
+    import my.json.models.foo._
 
     val json = JsonFile.readeJsonFile("foo")
 
@@ -16,7 +16,7 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
   }
 
   "Generated code from JSON document of FB post with optional field" should "contain optional field if it was marked as such" in {
-    import models.json.fbpost._
+    import my.json.models.fbpost._
 
     val json =
       """{
@@ -32,7 +32,7 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
   }
 
   "Generated code from JSON document of facebook site scala4beginner" should "contain optional message field" in {
-    import models.json.facebook._
+    import my.json.models.facebook._
 
     val json = JsonFile.readeJsonFile("facebook")
 
@@ -41,18 +41,18 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
     fb.posts.data.head.message shouldEqual None
   }
 
-  "Generated code from JSON document of HPImageArchive" should "contain url" in {
-    import models.json.hpimagearchive._
-
-    val json = Source.fromURL("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US").mkString
-
-    val imageArchive = Json.parse(json).as[HPImageArchive]
-
-    imageArchive.images.head.url should not be empty
-  }
+//  "Generated code from JSON document of HPImageArchive" should "contain url" in {
+//    import my.json.models.hpimagearchive._
+//
+//    val json = Source.fromURL("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US").mkString
+//
+//    val imageArchive = Json.parse(json).as[HPImageArchive]
+//
+//    imageArchive.images.head.url should not be empty
+//  }
 
   "Generated code from JSON document which contains a Scala type name" should "contain a class name with suffix" in {
-    import models.json.list._
+    import my.json.models.list._
 
     val json = JsonFile.readeJsonFile("list")
 
@@ -62,7 +62,7 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
   }
 
   "Generated code from JSON document with values of the same schema" should "contain only a single representation of the schema and correct order of play-json formats" in {
-    import models.json.geo._
+    import my.json.models.geo._
 
     val json = JsonFile.readeJsonFile("geo")
 

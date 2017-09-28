@@ -22,7 +22,8 @@ object SbtJsonPlugin extends AutoPlugin {
     src: File,
     interpreter: Interpreter,
     include: Include,
-    optionals: Map[String, Seq[(ClassName, ClassFieldName)]]) = {
+    optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
+    packageName: String) = {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
     sourceFiles.toList.map { file =>
       val srcFile = src / file
@@ -30,8 +31,8 @@ object SbtJsonPlugin extends AutoPlugin {
       val json = Source.fromFile(srcFile).getLines.mkString
       CaseClassGenerator.generate(include = include, interpreter = interpreter)(
         json.toJsonString,
-        name.capitalize.toRootTypeName, getOptionals(optionals, name))
-        .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name)))
+        name.capitalize.toRootTypeName, getOptionals(optionals, name, packageName))
+        .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name, packageName)))
         .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
     }
       .sequenceU
@@ -41,7 +42,8 @@ object SbtJsonPlugin extends AutoPlugin {
     urls: Seq[String],
     interpreter: Interpreter,
     include: Include,
-    optionals: Map[String, Seq[(ClassName, ClassFieldName)]]) = {
+    optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
+    packageName: String) = {
     urls.toList.map { url =>
       Http.request(url)
         .flatMap { json =>
@@ -50,8 +52,8 @@ object SbtJsonPlugin extends AutoPlugin {
             include = include,
             interpreter = interpreter)(
             json.toJsonString, name.capitalize.toRootTypeName,
-            getOptionals(optionals, name))
-            .map(source => (name, addHeaderAndPackage(source, name)))
+            getOptionals(optionals, name, packageName))
+            .map(source => (name, addHeaderAndPackage(source, name, packageName)))
             .leftMap(err => CaseClassSourceGenFailure(url, err))
         }
     }
@@ -64,34 +66,36 @@ object SbtJsonPlugin extends AutoPlugin {
     urls: Seq[String],
     interpreter: Interpreter,
     include: Include,
-    optionals: Map[String, Seq[(ClassName, ClassFieldName)]]) = {
+    optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
+    packageName: String) = {
     for {
-      fromFiles <- generateCaseClassSourcesFromFiles(src, interpreter, include, optionals)
-      fromUrls <- generateCaseClassSourceFromUrls(urls, interpreter, include, optionals)
+      fromFiles <- generateCaseClassSourcesFromFiles(src, interpreter, include, optionals, packageName)
+      fromUrls <- generateCaseClassSourceFromUrls(urls, interpreter, include, optionals, packageName)
     } yield {
       val generatedSources = fromUrls ++ fromFiles
       if (generatedSources.nonEmpty) dst.mkdirs()
       generatedSources.map { case (fileName, generatedSource) =>
-        val dstFile = dst / "models" / "json" / fileName.toLowerCase / (fileName.capitalize + ".scala")
+        val dstFile = packageName.split(".").foldLeft(dst) { case (acc, path) =>
+          acc / path
+        } / fileName.toLowerCase / (fileName.capitalize + ".scala")
         IO.write(dstFile, generatedSource)
         dstFile
       }
     }
   }
 
-  private def addHeaderAndPackage(generatedSource: String, name: String): String = {
-    val packageName = "models.json." + name.toLowerCase
+  private def addHeaderAndPackage(generatedSource: String, name: String, packageName: String): String = {
     s"""/** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-       |package $packageName
+       |package $packageName.${name.toLowerCase}
        |
        |$generatedSource
        |"""
       .stripMargin
   }
 
-  private def getOptionals(optionals: Map[String, Seq[(ClassName, ClassFieldName)]], packageName: String) = {
-    optionals.getOrElse(packageName.toLowerCase, Nil) ++ optionals.getOrElse(
-      s"models.json.${packageName.toLowerCase}",
+  private def getOptionals(optionals: Map[String, Seq[(ClassName, ClassFieldName)]], name: String, packageName: String) = {
+    optionals.getOrElse(name.toLowerCase, Nil) ++ optionals.getOrElse(
+      s"$packageName.${name.toLowerCase}",
       Nil)
   }
 
@@ -127,7 +131,7 @@ object SbtJsonPlugin extends AutoPlugin {
     includeJsValues := SchemaExtractorOptions.includeAll,
     jsonInterpreter := CaseClassToStringInterpreter.interpretWithPlayJsonFormats,
     jsonOptionals := Nil,
-    packageName := "jsonmodels",
+    packageName := "models.json",
     scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
 
@@ -138,13 +142,15 @@ object SbtJsonPlugin extends AutoPlugin {
           jsonSourcesDirectory.value,
           jsonInterpreter.value,
           includeJsValues.value,
-          optionals
+          optionals,
+          packageName.value
         )
         fromUrls <- generateCaseClassSourceFromUrls(
           jsonUrls.value,
           jsonInterpreter.value,
           includeJsValues.value,
-          optionals
+          optionals,
+          packageName.value
         )
       } yield fromFiles ++ fromUrls
 
@@ -160,7 +166,9 @@ object SbtJsonPlugin extends AutoPlugin {
         jsonUrls.value,
         jsonInterpreter.value,
         includeJsValues.value,
-        optionals)
+        optionals,
+        packageName.value
+      )
         .fold(
           err => throw new Exception(mkMessage(err)),
           files => files
