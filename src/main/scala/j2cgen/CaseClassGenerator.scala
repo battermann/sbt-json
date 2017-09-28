@@ -1,7 +1,7 @@
 package j2cgen
 
 import cats.implicits._
-import j2cgen.SchemaExtractorOptions.{Include, RootTypeName}
+import j2cgen.SchemaExtractorOptions.{JsValueFilter, RootTypeName}
 import j2cgen.models.CaseClass.{ClassFieldName, ClassName}
 import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models.caseClassSource.CaseClassSource
@@ -13,9 +13,9 @@ import shapeless.tag
 object CaseClassGenerator {
 
   def generate(
-    include: Include = SchemaExtractorOptions.includeAll,
+    include: JsValueFilter = SchemaExtractorOptions.allJsValues,
     suffix: Suffix = tag[SuffixTag][String]("Model"),
-    interpreter: Interpreter = CaseClassToStringInterpreter.interpret)
+    interpreter: Interpreter = CaseClassToStringInterpreter.plainCaseClasses)
     (
       jsonString: JsonString,
       root: RootTypeName,

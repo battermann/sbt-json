@@ -1,30 +1,41 @@
 package j2cgen
 
+import j2cgen.SchemaExtractorOptions.JsValueFilter
+import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models._
 import j2cgen.models.caseClassSource._
 
 object CaseClassToStringInterpreter {
 
-  def interpretWithPlayJsonFormats(caseClasses: Seq[CaseClass]): CaseClassSource = {
-    s"""${interpret(caseClasses)}
-       |${createCompanionObjectWithPlayJsonFormats(caseClasses)}
-       |"""
-      .stripMargin
-      .toCaseClassSource
+  implicit class InterpreterOptions(interpreter: Interpreter) {
+    def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
   }
 
-  def interpret(caseClasses: Seq[CaseClass]): CaseClassSource = {
-    val caseClassSource = caseClasses
-      .map(interpret)
-      .mkString("\n\n") + "\n"
-    caseClassSource.toCaseClassSource
+  def withPlayJsonFormats: Interpreter => Interpreter = {
+    interpreter => {
+      caseClasses =>
+        s"""${interpreter(caseClasses)}
+           |${createCompanionObjectWithPlayJsonFormats(caseClasses)}
+           |"""
+          .stripMargin
+          .toCaseClassSource
+    }
+  }
+
+  def plainCaseClasses: Interpreter = {
+    caseClasses => {
+      val caseClassSource = caseClasses
+        .map(interpret)
+        .mkString("\n\n") + "\n"
+      caseClassSource.toCaseClassSource
+    }
   }
 
   private def sortForPlayJsonFormats(caseClasses: Seq[CaseClass]): Seq[CaseClass] = {
     def sort(unordered: Seq[CaseClass], ordered: Seq[CaseClass]): Seq[CaseClass] = {
       unordered match {
         case h :: t =>
-          if(hasNoUnresolvedDependencies(ordered, h)) {
+          if (hasNoUnresolvedDependencies(ordered, h)) {
             sort(t, ordered ++ Seq(h))
           } else {
             sort(t ++ Seq(h), ordered)

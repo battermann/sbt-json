@@ -28,11 +28,11 @@ If you want to use play-json add the play-json library dependency:
 
 | name     | default | description |
 | -------- | ------- | ----------- |
-| jsonInterpreter | `interpretWithPlayJsonFormats`    | Specifies which interpreter to use. `interpret` and `interpretWithPlayJsonFormats` |
-| includeJsValues     | `includeAll`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays` |
+| jsonInterpreter | `plainCaseClasses.withPlayJsonFormats`    | Combinator that specifies which interpreter to use. (`plainCaseClasses` can be combined with `withPlayJsonFormats`) |
+| jsValueFilter     | `allJsValues`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. (`allJsValues` can be combined with `exceptEmptyArrays` and `exceptNullValues`. Example: `allJsValues.exceptEmptyArrays` |
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the `.json` files to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
-| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(("<package_name>", "<class_name>", "<field_name>"))` |
+| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField("<package_name>", "<class_name>", "<field_name>"))` |
 | packageName | `jsonmodels` | Package name for the generated case classes. |
 
 ## Example
@@ -40,7 +40,7 @@ If you want to use play-json add the play-json library dependency:
 If you want to analyze JSON data form `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US` and ignore empty arrays, add the following lines to the `build.sbt` file:
 
     jsonUrls += "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
-    includeJsValues := includeAll.exceptEmptyArrays
+    jsValueFilter := allJsValues.exceptEmptyArrays
 
 Then use play-json to read the JSON data:
 
@@ -59,33 +59,31 @@ The `jsonInterpreter` setting specifies if [play-json formats](https://www.playf
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
-The interpreters are located in `CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
+The interpreters can be set like this in the `build.sbt` file:
 
-    import CaseClassToStringInterpreter._
+    jsonInterpreter := plainCaseClasses
+    
+or if play-json-formats should be generated:
 
-    jsonInterpreter := interpretWithPlayJsonFormats
+    jsonInterpreter := plainCaseClasses.withPlayJsonFormats
 
-### includeJsValues
+### jsValueFilter
 
 By default the code generation will fail if the JSON sample contains empty arrays or null values. This follows the fail fast paradigm because some type information might be missing.
 
-To change this behavior you can set `includeJsValues` to ignore empty arrays or null values. The type of this setting is `type Include = JsValue => Boolean` and there are two combinators available as well as a convenient syntax (implicit classes).
-
-Add this import statement to the `build.sbt`:
-
-    import SchemaExtractorOptions._
+To change this behavior you can set `jsValueFilter` to ignore empty arrays or null values. The type of this setting is `type JsValueFilter = JsValue => Boolean` and there are two combinators available as well as a convenient syntax (implicit classes).
 
 Configure this setting to ignore empty arrays:
 
-    includeJsValues := includeAll.exceptEmptyArrays
+    jsValueFilter := allJsValues.exceptEmptyArrays
 
 Ignore null values:
 
-    includeJsValues := includeAll.exceptEmptyArrays
+    jsValueFilter := allJsValues.exceptNullValues
 
 Ignore empty arrays as well as null values:
 
-    includeJsValues := includeAll.exceptEmptyArrays.exceptNullValues
+    jsValueFilter := allJsValues.exceptEmptyArrays.exceptNullValues
 
 ### jsonSourcesDirectory
 
@@ -101,7 +99,7 @@ By default all files with a `.json` extension in the directory `src/main/resourc
 
 ### jsonOptionals
 
-If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a tuple containing the package name, class name, and field name to the `jsonOptionals` setting.
+If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a value of type `OptionalField` containing the package name, class name, and field name to the `jsonOptionals` setting.
 
 #### Example
 
@@ -142,7 +140,7 @@ Here the type of the `message` field is `String`. However, some facebook posts d
 
 To fix this, the field has to be marked as optional. Add the following line to the `build.sbt` file:
 
-    jsonOptionals += ("fbpost", "Fbpost", "message")
+    jsonOptionals += OptionalField("fbpost", "Fbpost", "message")
 
 Run `reload` in the sbt console and inspect the generated code again with `printJsonModels`. The `message` field is now of type `Option[String]`:
 
