@@ -1,10 +1,35 @@
 # sbt-json
 
-sbt-json is an sbt plugin that generates Scala case classes for easy and implicit access of JSON data e.g. from API responses.
+<!-- TOC -->
+
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Why use sbt-json?](#why-use-sbt-json)
+- [Settings](#settings)
+- [Examples](#example)
+- [Settings in depth](#settings-in-depth)
+- [Code generation features](#code-generation-features)
+- [Tasks](#tasks)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+
+<!-- /TOC -->
+
+## Overview
+
+sbt-json is an sbt plugin that generates Scala case classes for easy, statically typed, and implicit access of JSON data e.g. from API responses.
 
 The plugin makes it possible to access JSON documents in a statically typed way including auto-completion. It takes a sample JSON document as input (either from a file or a URL) and generates Scala types that can be used to read data with the same structure.
 
-sbt-json integrates very well with the [play-json library](https://github.com/playframework/play-json) as it can also generate play-json formats for implicit conversion of a `JsValue` to its Scala representation.
+sbt-json integrates very well with the [play-json library](https://github.com/playframework/play-json) as it can also generate play-json formats for implicit conversion of a `JsValue` to its Scala representation. (see [example](https://github.com/battermann/sbt-json/blob/master/README.md#play-json))
+
+sbt-json also works with [circe](https://circe.github.io/circe/) for many JSON schemas as circe automatically derives the necessary type classes for the generated types. (see [example](https://github.com/battermann/sbt-json/blob/master/README.md#circe))
+
+## Prerequisites
+
+0.13.5 <= sbt version < 1.0
 
 ## Installation
 
@@ -23,6 +48,30 @@ Edit the `build.sbt` file to enable the plugin and to generate case class source
 If you want to use play-json add the play-json library dependency:
 
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
+    
+## Usage
+
+After a successful installation place one or more `.json` files containing sample JSON documents in the directory `src/main/resources/json/`.
+
+By default play-json formats will be generated. If you don't use play-json in your project add `jsonInterpreter := plainCaseClasses` to your `build.sbt` file and reload sbt.
+
+On compile, case classes will be generated in `target/scala-{version}/src_managed/compiled_json/jsonmodels/{name}` where `name` will be the name of the corresponding `.json` file.
+
+To use the generated models, import `jsonmodels.{name}._` in your application code. You can now map a JSON document that has the same schema as the sample JSON document (e.g. from an API response) to the generated models. This can be done implicitly e.g. with circe or with play-json (see examples below).
+
+## Why use sbt-json?
+
+sbt-json supports easy, statically typed and implicit access to JSON data with minimal overhead and minimal boiler-plate.
+
+There are other online tools (e.g. [http://json2caseclass.cleverapps.io](http://json2caseclass.cleverapps.io) or [http://transform.now.sh/json-to-scala-case-class](https://transform.now.sh/json-to-scala-case-class)) that allow pasting a JSON string to generate Scala case classes which you can copy and paste back into your solution. But with sbt-json, once installed, you don't need an external tool. Moreover, the workflow of adding a new JSON schema involves less steps and the generated case classes do not need to be maintained.
+
+Additionally sbt-json handles a lot of edge cases that will cause problems when using the available online tools. For example:
+
+* Optional object fields will be recognized automatically for an array of a given objects
+* Derived class names will be unique
+* Scala reserved words will be avoided
+
+Another advantage of sbt-json is the optional generation of play-json formats that otherwise you would have to write manually.
 
 ## Settings
 
@@ -36,6 +85,8 @@ If you want to use play-json add the play-json library dependency:
 | packageName | `jsonmodels` | Package name for the generated case classes. |
 
 ## Example
+
+### play-json
 
 If you want to analyze JSON data form `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US` and ignore empty arrays, add the following lines to the `build.sbt` file:
 
@@ -51,11 +102,54 @@ Then use play-json to read the JSON data:
     val imageArchive = Json.parse(json).as[HPImageArchive]
     println(imageArchive.images.head.url)
 
+### circe
+
+sbt-json also works with [circe](https://circe.github.io/circe/) for many JSON schemas as circe automatically derives the necessary type classes for the generated types.
+
+In the `buld.sbt` add the circe dependencies:
+
+    val circeVersion = "0.8.0"
+
+    libraryDependencies ++= Seq(
+      "io.circe" %% "circe-core",
+      "io.circe" %% "circe-generic",
+      "io.circe" %% "circe-parser"
+    ).map(_ % circeVersion)
+    
+It is important to set the interpreter to not generate play-json formats:
+
+    jsonInterpreter := plainCaseClasses
+    
+Now add a file or URL with the JSON sample, e.g.:
+
+    jsonUrls += "https://api.coindesk.com/v1/bpi/currentprice.json"
+    
+Use circe to decode the JSON data:
+
+      import io.circe.generic.auto._
+      import io.circe.parser._
+      import jsonmodels.currentprice._
+
+      val url = "https://api.coindesk.com/v1/bpi/currentprice.json"
+      val rawJson = scala.io.Source.fromURL(url).mkString
+      val currentPriceOrError = decode[Currentprice](rawJson)
+      val output = currentPriceOrError fold (
+        err => err.getMessage,
+        currentPrice => {
+          val info = currentPrice.bpi.EUR.description
+          val priceInEuro = currentPrice.bpi.EUR.rate_float
+          val date = currentPrice.time.updated
+          s"Current Bitcoin price ($info): $priceInEuro (timestamp: $date)"
+        }
+      )
+
+      println(output)
+
 ## Settings in depth
 
 ### jsonInterpreter
 
-The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two options for this setting available, `interpretWithPlayJsonFormats` (default) and `interpret`. The type of the interpreter function is:
+The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two options for this setting available, `plainCaseClasses` (default) and `plainCaseClasses.withPlayJsonFormats`. The type of the interpreter function is:
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
@@ -301,14 +395,18 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
         southwest: Location
     )
 
-Note: There used to be an issue with the order of play-json formats in the above scenario which has been resolved in this version. (See: [issue](https://github.com/battermann/sbt-json/issues/2)).
-
 ## Tasks
 
 | name     | description |
 | -------- | ----------- |
 | printJsonModels | Prints the generated case classes to the console. |
 | generateJsonModels | Creates source files containing the generates case classes. |
+
+## Troubleshooting
+
+### Why is the generated code ignored by IntelliJ?
+
+If the generated code is ignored by the compiler, in the **Project** tool window include the folder `target/scala-{version}/src_managed` by selecting **Mark Directory as | Generated Source Root** through the context menu, as described [here](https://www.jetbrains.com/help/idea/configuring-content-roots.html#d85322e277).
 
 ## Contributing
 
