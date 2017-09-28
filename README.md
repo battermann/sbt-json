@@ -32,7 +32,7 @@ If you want to use play-json add the play-json library dependency:
 | includeJsValues     | `includeAll`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays` |
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the `.json` files to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
-| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(("<package_name>", "<class_name>", "<field_name>"))` |
+| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField("<package_name>", "<class_name>", "<field_name>"))` |
 | packageName | `jsonmodels` | Package name for the generated case classes. |
 
 ## Example
@@ -101,7 +101,7 @@ By default all files with a `.json` extension in the directory `src/main/resourc
 
 ### jsonOptionals
 
-If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a tuple containing the package name, class name, and field name to the `jsonOptionals` setting.
+If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a value of type `OptionalField` containing the package name, class name, and field name to the `jsonOptionals` setting.
 
 #### Example
 

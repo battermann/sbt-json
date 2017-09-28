@@ -12,7 +12,6 @@ import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
 import sbtjson.ErrorMessages._
-import sbtjson.models.Optional
 
 import scala.io.Source
 
@@ -116,12 +115,18 @@ object SbtJsonPlugin extends AutoPlugin {
       "Path containing the `.json` files to analyze.")
     lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]](
       "json-urls", "List of urls that serve JSON data to be analyzed.")
-    lazy val jsonOptionals: SettingKey[Seq[Optional]] = SettingKey[Seq[Optional]](
+    lazy val jsonOptionals: SettingKey[Seq[OptionalField]] = SettingKey[Seq[OptionalField]](
       "json-optionals",
-      "Specify which fields should be optional, e.g. `jsonOptionals := Seq(Optional(\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
+      "Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField(\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
     lazy val packageName: SettingKey[String] = SettingKey[String](
       "package-name", "Package name for the generated case classes.")
     lazy val scalaSourceDir: SettingKey[File] = SettingKey[File]("scala-source-dir", "Path for generated case classes.")
+
+    case class OptionalField(
+      packageName: String,
+      className: String,
+      fieldName: String
+    )
   }
 
   import autoImport._
@@ -179,10 +184,10 @@ object SbtJsonPlugin extends AutoPlugin {
     managedSourceDirectories in Compile += (scalaSourceDir in Compile).value
   )
 
-  private def toOptionalsMap(optionals: Seq[Optional]): Map[String, Seq[(ClassName, ClassFieldName)]] = {
+  private def toOptionalsMap(optionals: Seq[OptionalField]): Map[String, Seq[(ClassName, ClassFieldName)]] = {
     optionals
-      .groupBy { case Optional(pkgName, _, _) => pkgName }
-      .map { case (key, value) => (key.toLowerCase, value.map { case Optional(_, cName, fName) =>
+      .groupBy { case OptionalField(pkgName, _, _) => pkgName }
+      .map { case (key, value) => (key.toLowerCase, value.map { case OptionalField(_, cName, fName) =>
         (cName.toClassName, fName.toClassFieldName)
       })
       }
