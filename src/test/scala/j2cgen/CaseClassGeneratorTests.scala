@@ -118,7 +118,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate(include = exceptEmptyArrays(includeAll))(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(include = exceptEmptyArrays(allJsValues))(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -141,7 +141,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate(include = exceptNullValues(includeAll))(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(include = exceptNullValues(allJsValues))(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -197,7 +197,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate(include = exceptEmptyArrays(includeAll))(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(include = exceptEmptyArrays(allJsValues))(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(

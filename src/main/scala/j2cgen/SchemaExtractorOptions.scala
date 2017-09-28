@@ -5,32 +5,33 @@ import shapeless.tag.@@
 
 object SchemaExtractorOptions {
 
-  type Include = JsValue => Boolean
+  type JsValueFilter = JsValue => Boolean
 
   trait RootTypeNameTag
+
   type RootTypeName = String @@ RootTypeNameTag
 
   implicit class ToRootTypeName(name: String) {
     def toRootTypeName: RootTypeName = name.asInstanceOf[RootTypeName]
   }
 
-  val includeAll: Include = _ => true
+  val allJsValues: JsValueFilter = _ => true
 
-  val exceptEmptyArrays: Include => Include = { include =>
-    jsValue => include(jsValue) && (jsValue match {
+  val exceptEmptyArrays: JsValueFilter => JsValueFilter = {
+    include => {
       case JsArray(values) if values.isEmpty => false
-      case _ => true
-    })
+      case jsValue => include(jsValue)
+    }
   }
 
-  val exceptNullValues: Include => Include = { include =>
-    jsValue => include(jsValue) && (jsValue match {
+  val exceptNullValues: JsValueFilter => JsValueFilter = {
+    include => {
       case JsNull => false
-      case _ => true
-    })
+      case jsValue => include(jsValue)
+    }
   }
 
-  implicit class IncludeOptions(include: Include) {
+  implicit class IncludeOptions(include: JsValueFilter) {
     def exceptEmptyArrays = SchemaExtractorOptions.exceptEmptyArrays(include)
     def exceptNullValues = SchemaExtractorOptions.exceptNullValues(include)
   }

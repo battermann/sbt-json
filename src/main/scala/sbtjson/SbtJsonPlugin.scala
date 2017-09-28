@@ -3,13 +3,11 @@ package sbtjson
 import java.io.File
 
 import cats.implicits._
-import j2cgen.SchemaExtractorOptions.{Include, _}
-import j2cgen.models.CaseClass
-import j2cgen.{CaseClassGenerator, _}
+import j2cgen.SchemaExtractorOptions.{JsValueFilter, _}
 import j2cgen.models.CaseClass._
 import j2cgen.models.Interpreter.Interpreter
-import j2cgen.models.caseClassSource.CaseClassSource
 import j2cgen.models.json._
+import j2cgen.{CaseClassGenerator, _}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -23,7 +21,7 @@ object SbtJsonPlugin extends AutoPlugin {
   private def generateCaseClassSourcesFromFiles(
     src: File,
     interpreter: Interpreter,
-    include: Include,
+    include: JsValueFilter,
     optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
     packageName: String) = {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
@@ -43,7 +41,7 @@ object SbtJsonPlugin extends AutoPlugin {
   private def generateCaseClassSourceFromUrls(
     urls: Seq[String],
     interpreter: Interpreter,
-    include: Include,
+    include: JsValueFilter,
     optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
     packageName: String) = {
     urls.toList.map { url =>
@@ -67,7 +65,7 @@ object SbtJsonPlugin extends AutoPlugin {
     dst: File,
     urls: Seq[String],
     interpreter: Interpreter,
-    include: Include,
+    include: JsValueFilter,
     optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
     packageName: String) = {
     for {
@@ -109,7 +107,7 @@ object SbtJsonPlugin extends AutoPlugin {
     lazy val jsonInterpreter: SettingKey[Interpreter] = SettingKey[Interpreter](
       "json-interpreter",
       "Specifies which interpreter to use. `interpret` and `interpretWithPlayJsonFormats`")
-    lazy val includeJsValues: SettingKey[Include] = SettingKey[Include](
+    lazy val jsValueFilter: SettingKey[JsValueFilter] = SettingKey[JsValueFilter](
       "include",
       "Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays`")
     lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File](
@@ -131,10 +129,16 @@ object SbtJsonPlugin extends AutoPlugin {
     )
 
     val plainCaseClasses: Interpreter = CaseClassToStringInterpreter.plainCaseClasses
-    val withPlayJsonFormats: Interpreter => Interpreter = CaseClassToStringInterpreter.withPlayJsonFormats
 
     implicit class InterpreterOptions(interpreter: Interpreter) {
       def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
+    }
+
+    val allJsValues: JsValueFilter = SchemaExtractorOptions.allJsValues
+
+    implicit class JsValueFilterOptions(jsValueFilter: JsValueFilter) {
+      def exceptEmptyArrays = SchemaExtractorOptions.exceptEmptyArrays(jsValueFilter)
+      def exceptNullValues = SchemaExtractorOptions.exceptNullValues(jsValueFilter)
     }
   }
 
@@ -143,7 +147,7 @@ object SbtJsonPlugin extends AutoPlugin {
   override lazy val projectSettings = Seq(
     jsonSourcesDirectory := baseDirectory.value / "src" / "main" / "resources" / "json",
     jsonUrls := Nil,
-    includeJsValues := SchemaExtractorOptions.includeAll,
+    jsValueFilter := allJsValues,
     jsonInterpreter := plainCaseClasses.withPlayJsonFormats,
     jsonOptionals := Nil,
     packageName := "jsonmodels",
@@ -156,14 +160,14 @@ object SbtJsonPlugin extends AutoPlugin {
         fromFiles <- generateCaseClassSourcesFromFiles(
           jsonSourcesDirectory.value,
           jsonInterpreter.value,
-          includeJsValues.value,
+          jsValueFilter.value,
           optionals,
           packageName.value
         )
         fromUrls <- generateCaseClassSourceFromUrls(
           jsonUrls.value,
           jsonInterpreter.value,
-          includeJsValues.value,
+          jsValueFilter.value,
           optionals,
           packageName.value
         )
@@ -180,7 +184,7 @@ object SbtJsonPlugin extends AutoPlugin {
         scalaSourceDir.value,
         jsonUrls.value,
         jsonInterpreter.value,
-        includeJsValues.value,
+        jsValueFilter.value,
         optionals,
         packageName.value
       )

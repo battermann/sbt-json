@@ -3,7 +3,7 @@ package j2cgen
 import java.util.UUID
 
 import cats.implicits._
-import j2cgen.SchemaExtractorOptions.{Include, RootTypeName}
+import j2cgen.SchemaExtractorOptions.{JsValueFilter, RootTypeName}
 import j2cgen.models.Schema._
 import j2cgen.models._
 import play.api.libs.json._
@@ -12,29 +12,29 @@ import play.api.libs.json._
 object SchemaExtractor {
 
   def extractSchemaFromJsonRoot(
-    include: Include,
+    jsValueFilter: JsValueFilter,
     nameGenerator: SchemaNameGenerator,
     value: JsValue,
     root: RootTypeName): Either[CaseClassGenerationFailure, Schema] = {
     value match {
       case JsObject(fields) =>
-        extractSchemaFromJsObjectFields(include, nameGenerator, root, fields.toList)
+        extractSchemaFromJsObjectFields(jsValueFilter, nameGenerator, root, fields.toList)
       case JsArray(values) =>
-        extractSchemaFromArray(include, nameGenerator, root, values)
+        extractSchemaFromArray(jsValueFilter, nameGenerator, root, values)
       case _ =>
         Left(InvalidRoot)
     }
   }
 
   private def extractSchemaFromJsObjectFields(
-    include: Include,
+    jsValueFilter: JsValueFilter,
     nameGenerator: SchemaNameGenerator,
     name: String,
     fields: List[(String, JsValue)]): Either[CaseClassGenerationFailure, Schema] = {
     fields
-      .filter { case (_, value) => include(value) }
+      .filter { case (_, value) => jsValueFilter(value) }
       .map { case (fieldName, value) =>
-        extractSchemaFromJsValue(include, nameGenerator, fieldName, value).leftMap {
+        extractSchemaFromJsValue(jsValueFilter, nameGenerator, fieldName, value).leftMap {
           case ValueIsNull(_) => ValueIsNull(s"$name.$fieldName")
           case other => other
         }
@@ -45,7 +45,7 @@ object SchemaExtractor {
   }
 
   private def extractSchemaFromJsValue(
-    include: Include,
+    jsValueFilter: JsValueFilter,
     nameGenerator: SchemaNameGenerator,
     name: String,
     value: JsValue): Either[CaseClassGenerationFailure, (String, Schema)] = {
@@ -59,9 +59,9 @@ object SchemaExtractor {
       case JsBoolean(_) =>
         Right(SchemaBoolean)
       case JsObject(fields) =>
-        extractSchemaFromJsObjectFields(include, nameGenerator, name, fields.toList)
+        extractSchemaFromJsObjectFields(jsValueFilter, nameGenerator, name, fields.toList)
       case JsArray(values) =>
-        extractSchemaFromArray(include, nameGenerator, name, values)
+        extractSchemaFromArray(jsValueFilter, nameGenerator, name, values)
     }
     schemaOrError.map((name, _))
   }
@@ -74,14 +74,14 @@ object SchemaExtractor {
   }
 
   private def extractSchemaFromArray(
-    include: Include,
+    jsValueFilter: JsValueFilter,
     nameGenerator: SchemaNameGenerator,
     name: String,
     values: Seq[JsValue]): Either[CaseClassGenerationFailure, Schema] = {
     val schemasOrError =
       values
-        .filter(value => include(value))
-        .map(value => extractSchemaFromJsValue(include, nameGenerator, name, value).map(_._2))
+        .filter(value => jsValueFilter(value))
+        .map(value => extractSchemaFromJsValue(jsValueFilter, nameGenerator, name, value).map(_._2))
         .toList
         .sequenceU
 

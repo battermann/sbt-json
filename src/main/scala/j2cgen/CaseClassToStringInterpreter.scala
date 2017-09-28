@@ -1,6 +1,6 @@
 package j2cgen
 
-import j2cgen.SchemaExtractorOptions.Include
+import j2cgen.SchemaExtractorOptions.JsValueFilter
 import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models._
 import j2cgen.models.caseClassSource._
