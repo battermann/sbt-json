@@ -3,11 +3,11 @@ package sbtjson
 import java.io.File
 
 import cats.implicits._
-import j2cgen.SchemaExtractorOptions.{Include, _}
-import j2cgen.{CaseClassGenerator, _}
+import j2cgen.SchemaExtractorOptions.{JsValueFilter, _}
 import j2cgen.models.CaseClass._
 import j2cgen.models.Interpreter.Interpreter
 import j2cgen.models.json._
+import j2cgen.{CaseClassGenerator, _}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -18,20 +18,21 @@ import scala.io.Source
 object SbtJsonPlugin extends AutoPlugin {
   override def requires = JvmPlugin
 
-
   private def generateCaseClassSourcesFromFiles(
     src: File,
     interpreter: Interpreter,
-    include: Include,
-    optionals: Map[String, Seq[(ClassName, ClassFieldName)]]) = {
+    include: JsValueFilter,
+    optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
+    packageName: String) = {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
     sourceFiles.toList.map { file =>
       val srcFile = src / file
       val name = file.take(file lastIndexOf '.')
       val json = Source.fromFile(srcFile).getLines.mkString
-      CaseClassGenerator.generate(include = include, interpreter = interpreter)(json.toJsonString,
-        name.capitalize.toRootTypeName, getOptionals(optionals, name))
-        .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name)))
+      CaseClassGenerator.generate(include = include, interpreter = interpreter)(
+        json.toJsonString,
+        name.capitalize.toRootTypeName, getOptionals(optionals, name, packageName))
+        .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name, packageName)))
         .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
     }
       .sequenceU
@@ -40,16 +41,19 @@ object SbtJsonPlugin extends AutoPlugin {
   private def generateCaseClassSourceFromUrls(
     urls: Seq[String],
     interpreter: Interpreter,
-    include: Include,
-    optionals: Map[String, Seq[(ClassName, ClassFieldName)]]) = {
+    include: JsValueFilter,
+    optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
+    packageName: String) = {
     urls.toList.map { url =>
       Http.request(url)
         .flatMap { json =>
           val name = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
-          CaseClassGenerator.generate(include = include,
-            interpreter = interpreter)(json.toJsonString, name.capitalize.toRootTypeName,
-            getOptionals(optionals, name))
-            .map(source => (name, addHeaderAndPackage(source, name)))
+          CaseClassGenerator.generate(
+            include = include,
+            interpreter = interpreter)(
+            json.toJsonString, name.capitalize.toRootTypeName,
+            getOptionals(optionals, name, packageName))
+            .map(source => (name, addHeaderAndPackage(source, name, packageName)))
             .leftMap(err => CaseClassSourceGenFailure(url, err))
         }
     }
@@ -61,50 +65,81 @@ object SbtJsonPlugin extends AutoPlugin {
     dst: File,
     urls: Seq[String],
     interpreter: Interpreter,
-    include: Include,
-    optionals: Map[String, Seq[(ClassName, ClassFieldName)]]) = {
+    include: JsValueFilter,
+    optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
+    packageName: String) = {
     for {
-      fromFiles <- generateCaseClassSourcesFromFiles(src, interpreter, include, optionals)
-      fromUrls <- generateCaseClassSourceFromUrls(urls, interpreter, include, optionals)
+      fromFiles <- generateCaseClassSourcesFromFiles(src, interpreter, include, optionals, packageName)
+      fromUrls <- generateCaseClassSourceFromUrls(urls, interpreter, include, optionals, packageName)
     } yield {
       val generatedSources = fromUrls ++ fromFiles
       if (generatedSources.nonEmpty) dst.mkdirs()
       generatedSources.map { case (fileName, generatedSource) =>
-        val dstFile = dst / "models" / "json" / fileName.toLowerCase / (fileName.capitalize + ".scala")
+        val dstFile = packageName.split(".").foldLeft(dst) { case (acc, path) =>
+          acc / path
+        } / fileName.toLowerCase / (fileName.capitalize + ".scala")
         IO.write(dstFile, generatedSource)
         dstFile
       }
     }
   }
 
-  private def addHeaderAndPackage(generatedSource: String, name: String): String = {
-    val packageName = "models.json." + name.toLowerCase
+  private def addHeaderAndPackage(generatedSource: String, name: String, packageName: String): String = {
     s"""/** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-       |package $packageName
+       |package $packageName.${name.toLowerCase}
        |
-             |$generatedSource
+       |$generatedSource
        |"""
       .stripMargin
   }
 
-  private def getOptionals(optionals: Map[String, Seq[(ClassName, ClassFieldName)]], packageName: String) = {
-    optionals.getOrElse(packageName.toLowerCase, Nil) ++ optionals.getOrElse(s"models.json.${packageName.toLowerCase}",
+  private def getOptionals(optionals: Map[String, Seq[(ClassName, ClassFieldName)]], name: String, packageName: String) = {
+    optionals.getOrElse(name.toLowerCase, Nil) ++ optionals.getOrElse(
+      s"$packageName.${name.toLowerCase}",
       Nil)
   }
 
   object autoImport {
     lazy val printJsonModels: TaskKey[Unit] = TaskKey[Unit]("print-json-models", "Prints the generated JSON models.")
-    lazy val generateJsonModels: TaskKey[Seq[File]] = TaskKey[Seq[File]]("generate-json-models",
+    lazy val generateJsonModels: TaskKey[Seq[File]] = TaskKey[Seq[File]](
+      "generate-json-models",
       "Generates JSON model case classes.")
-    lazy val jsonInterpreter: SettingKey[Interpreter] = SettingKey[Interpreter]("json-interpreter",
+    lazy val jsonInterpreter: SettingKey[Interpreter] = SettingKey[Interpreter](
+      "json-interpreter",
       "Specifies which interpreter to use. `interpret` and `interpretWithPlayJsonFormats`")
-    lazy val includeJsValues: SettingKey[Include] = SettingKey[Include]("include",
+    lazy val jsValueFilter: SettingKey[JsValueFilter] = SettingKey[JsValueFilter](
+      "include",
       "Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays`")
-    lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File]("json-source-directory",
+    lazy val jsonSourcesDirectory: SettingKey[File] = SettingKey[File](
+      "json-source-directory",
       "Path containing the `.json` files to analyze.")
-    lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]]("json-urls", "List of urls that serve JSON data to be analyzed.")
-    lazy val jsonOptionals: SettingKey[Seq[(String, String, String)]] = SettingKey[Seq[(String, String, String)]](
-      "json-optionals", "Specify which fields should be optional, e.g. `jsonOptionals := Seq((\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
+    lazy val jsonUrls: SettingKey[Seq[String]] = SettingKey[Seq[String]](
+      "json-urls", "List of urls that serve JSON data to be analyzed.")
+    lazy val jsonOptionals: SettingKey[Seq[OptionalField]] = SettingKey[Seq[OptionalField]](
+      "json-optionals",
+      "Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField(\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
+    lazy val packageName: SettingKey[String] = SettingKey[String](
+      "package-name", "Package name for the generated case classes.")
+    lazy val scalaSourceDir: SettingKey[File] = SettingKey[File]("scala-source-dir", "Path for generated case classes.")
+
+    case class OptionalField(
+      packageName: String,
+      className: String,
+      fieldName: String
+    )
+
+    val plainCaseClasses: Interpreter = CaseClassToStringInterpreter.plainCaseClasses
+
+    implicit class InterpreterOptions(interpreter: Interpreter) {
+      def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
+    }
+
+    val allJsValues: JsValueFilter = SchemaExtractorOptions.allJsValues
+
+    implicit class JsValueFilterOptions(jsValueFilter: JsValueFilter) {
+      def exceptEmptyArrays = SchemaExtractorOptions.exceptEmptyArrays(jsValueFilter)
+      def exceptNullValues = SchemaExtractorOptions.exceptNullValues(jsValueFilter)
+    }
   }
 
   import autoImport._
@@ -112,9 +147,11 @@ object SbtJsonPlugin extends AutoPlugin {
   override lazy val projectSettings = Seq(
     jsonSourcesDirectory := baseDirectory.value / "src" / "main" / "resources" / "json",
     jsonUrls := Nil,
-    includeJsValues := SchemaExtractorOptions.includeAll,
-    jsonInterpreter := CaseClassToStringInterpreter.interpretWithPlayJsonFormats,
+    jsValueFilter := allJsValues,
+    jsonInterpreter := plainCaseClasses.withPlayJsonFormats,
     jsonOptionals := Nil,
+    packageName := "jsonmodels",
+    scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
 
       val optionals = toOptionalsMap(jsonOptionals.value)
@@ -123,14 +160,16 @@ object SbtJsonPlugin extends AutoPlugin {
         fromFiles <- generateCaseClassSourcesFromFiles(
           jsonSourcesDirectory.value,
           jsonInterpreter.value,
-          includeJsValues.value,
-          optionals
+          jsValueFilter.value,
+          optionals,
+          packageName.value
         )
         fromUrls <- generateCaseClassSourceFromUrls(
           jsonUrls.value,
           jsonInterpreter.value,
-          includeJsValues.value,
-          optionals
+          jsValueFilter.value,
+          optionals,
+          packageName.value
         )
       } yield fromFiles ++ fromUrls
 
@@ -139,27 +178,29 @@ object SbtJsonPlugin extends AutoPlugin {
     generateJsonModels := {
 
       val optionals = toOptionalsMap(jsonOptionals.value)
-      val genSourceDir = sourceManaged.value / "main" / "compiled_json"
 
       generateSourceFiles(
         jsonSourcesDirectory.value,
-        genSourceDir,
+        scalaSourceDir.value,
         jsonUrls.value,
         jsonInterpreter.value,
-        includeJsValues.value,
-        optionals)
+        jsValueFilter.value,
+        optionals,
+        packageName.value
+      )
         .fold(
           err => throw new Exception(mkMessage(err)),
           files => files
         )
     },
-    sourceGenerators in Compile += (generateJsonModels in Compile)
+    sourceGenerators in Compile += (generateJsonModels in Compile),
+    managedSourceDirectories in Compile += (scalaSourceDir in Compile).value
   )
 
-  private def toOptionalsMap(optionals: Seq[(String, String, String)]) = {
+  private def toOptionalsMap(optionals: Seq[OptionalField]): Map[String, Seq[(ClassName, ClassFieldName)]] = {
     optionals
-      .groupBy { case (pkgName, _, _) => pkgName }
-      .map { case (key, value) => (key.toLowerCase, value.map { case (_, cName, fName) =>
+      .groupBy { case OptionalField(pkgName, _, _) => pkgName }
+      .map { case (key, value) => (key.toLowerCase, value.map { case OptionalField(_, cName, fName) =>
         (cName.toClassName, fName.toClassFieldName)
       })
       }

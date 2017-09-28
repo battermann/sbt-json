@@ -6,6 +6,8 @@ import j2cgen.models.CaseClass._
 import j2cgen.models.ScalaType._
 import j2cgen.models.{CaseClass, ScalaObject}
 import org.scalatest._
+import CaseClassToStringInterpreter._
+import j2cgen.models.Interpreter.Interpreter
 
 class CaseClassToStringInterpreterTests extends FlatSpec with Matchers {
 
@@ -62,7 +64,7 @@ class CaseClassToStringInterpreterTests extends FlatSpec with Matchers {
                      |}
                      |""".stripMargin
 
-    val actual = CaseClassToStringInterpreter.interpretWithPlayJsonFormats(caseClasses)
+    val actual = plainCaseClasses.withPlayJsonFormats(caseClasses)
 
     actual shouldEqual expected
   }

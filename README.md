@@ -53,11 +53,11 @@ If you want to use play-json add the play-json library dependency:
 
 After a successful installation place one or more `.json` files containing sample JSON documents in the directory `src/main/resources/json/`.
 
-By default play-json formats will be generated. If you don't use play-json in your project import `j2cgen.CaseClassToStringInterpreter._` and add `jsonInterpreter := interpret` to your `build.sbt` file and reload sbt.
+By default play-json formats will be generated. If you don't use play-json in your project add `jsonInterpreter := plainCaseClasses` to your `build.sbt` file and reload sbt.
 
-On compile, case classes will be generated in `target/scala-{version}/src_managed/main/compiled_json/models/json/{name}` where `name` will be the name of the corresponding `.json` file.
+On compile, case classes will be generated in `target/scala-{version}/src_managed/compiled_json/jsonmodels/{name}` where `name` will be the name of the corresponding `.json` file.
 
-To use the generated models, import `models.json.{name}._` in your application code. You can now map a JSON document that has the same schema as the sample JSON document (e.g. from an API response) to the generated models. This can be done implicitly e.g. with circe or with play-json (see examples below).
+To use the generated models, import `jsonmodels.{name}._` in your application code. You can now map a JSON document that has the same schema as the sample JSON document (e.g. from an API response) to the generated models. This can be done implicitly e.g. with circe or with play-json (see examples below).
 
 ## Why use sbt-json?
 
@@ -77,11 +77,12 @@ Another advantage of sbt-json is the optional generation of play-json formats th
 
 | name     | default | description |
 | -------- | ------- | ----------- |
-| jsonInterpreter | `interpretWithPlayJsonFormats`    | Specifies which interpreter to use. `interpret` and `interpretWithPlayJsonFormats` |
-| includeJsValues     | `includeAll`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. `exceptEmptyArrays` and `exceptNullValues`. Example: `includeAll.exceptEmptyArrays` |
+| jsonInterpreter | `plainCaseClasses.withPlayJsonFormats`    | Combinator that specifies which interpreter to use. (`plainCaseClasses` can be combined with `withPlayJsonFormats`) |
+| jsValueFilter     | `allJsValues`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. (`allJsValues` can be combined with `exceptEmptyArrays` and `exceptNullValues`. Example: `allJsValues.exceptEmptyArrays` |
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the `.json` files to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
-| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(("<package_name>", "<class_name>", "<field_name>"))` |
+| jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField("<package_name>", "<class_name>", "<field_name>"))` |
+| packageName | `jsonmodels` | Package name for the generated case classes. |
 
 ## Example
 
@@ -90,12 +91,12 @@ Another advantage of sbt-json is the optional generation of play-json formats th
 If you want to analyze JSON data form `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US` and ignore empty arrays, add the following lines to the `build.sbt` file:
 
     jsonUrls += "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
-    includeJsValues := includeAll.exceptEmptyArrays
+    jsValueFilter := allJsValues.exceptEmptyArrays
 
 Then use play-json to read the JSON data:
 
     import play.api.libs.json.Json
-    import models.json.hpimagearchive._
+    import jsonmodels.hpimagearchive._
 
     val json = Source.fromURL("https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US").mkString
     val imageArchive = Json.parse(json).as[HPImageArchive]
@@ -117,7 +118,7 @@ In the `buld.sbt` add the circe dependencies:
     
 It is important to set the interpreter to not generate play-json formats:
 
-    jsonInterpreter := j2cgen.CaseClassToStringInterpreter.interpret
+    jsonInterpreter := plainCaseClasses
     
 Now add a file or URL with the JSON sample, e.g.:
 
@@ -127,7 +128,7 @@ Use circe to decode the JSON data:
 
       import io.circe.generic.auto._
       import io.circe.parser._
-      import models.json.currentprice._
+      import jsonmodels.currentprice._
 
       val url = "https://api.coindesk.com/v1/bpi/currentprice.json"
       val rawJson = scala.io.Source.fromURL(url).mkString
@@ -148,37 +149,35 @@ Use circe to decode the JSON data:
 
 ### jsonInterpreter
 
-The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two options for this setting available, `interpretWithPlayJsonFormats` (default) and `interpret`. The type of the interpreter function is:
+The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two options for this setting available, `plainCaseClasses` (default) and `plainCaseClasses.withPlayJsonFormats`. The type of the interpreter function is:
 
     type Interpreter = Seq[CaseClass] => CaseClassSource
 
-The interpreters are located in `CaseClassToStringInterpreter` and can be set like this in the `build.sbt` file:
+The interpreters can be set like this in the `build.sbt` file:
 
-    import CaseClassToStringInterpreter._
+    jsonInterpreter := plainCaseClasses
+    
+or if play-json-formats should be generated:
 
-    jsonInterpreter := interpretWithPlayJsonFormats
+    jsonInterpreter := plainCaseClasses.withPlayJsonFormats
 
-### includeJsValues
+### jsValueFilter
 
 By default the code generation will fail if the JSON sample contains empty arrays or null values. This follows the fail fast paradigm because some type information might be missing.
 
-To change this behavior you can set `includeJsValues` to ignore empty arrays or null values. The type of this setting is `type Include = JsValue => Boolean` and there are two combinators available as well as a convenient syntax (implicit classes).
-
-Add this import statement to the `build.sbt`:
-
-    import SchemaExtractorOptions._
+To change this behavior you can set `jsValueFilter` to ignore empty arrays or null values. The type of this setting is `type JsValueFilter = JsValue => Boolean` and there are two combinators available as well as a convenient syntax (implicit classes).
 
 Configure this setting to ignore empty arrays:
 
-    includeJsValues := includeAll.exceptEmptyArrays
+    jsValueFilter := allJsValues.exceptEmptyArrays
 
 Ignore null values:
 
-    includeJsValues := includeAll.exceptEmptyArrays
+    jsValueFilter := allJsValues.exceptNullValues
 
 Ignore empty arrays as well as null values:
 
-    includeJsValues := includeAll.exceptEmptyArrays.exceptNullValues
+    jsValueFilter := allJsValues.exceptEmptyArrays.exceptNullValues
 
 ### jsonSourcesDirectory
 
@@ -194,7 +193,7 @@ By default all files with a `.json` extension in the directory `src/main/resourc
 
 ### jsonOptionals
 
-If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a tuple containing the package name, class name, and field name to the `jsonOptionals` setting.
+If the JSON documents contain optional fields, they have to be explicitly marked as such. To do this, add a value of type `OptionalField` containing the package name, class name, and field name to the `jsonOptionals` setting.
 
 #### Example
 
@@ -210,7 +209,7 @@ Place a file `fbpost.json` containng a JSON document of a facebook post inside t
 You can inspect the result of the code generation by running the sbt-json task `printJsonModels`:
 
     [info] /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-    [info] package models.json.fbpost
+    [info] package jsonmodels.fbpost
     [info] 
     [info] case class Fbpost(
     [info]   id: String,
@@ -235,12 +234,12 @@ Here the type of the `message` field is `String`. However, some facebook posts d
 
 To fix this, the field has to be marked as optional. Add the following line to the `build.sbt` file:
 
-    jsonOptionals += ("fbpost", "Fbpost", "message")
+    jsonOptionals += OptionalField("fbpost", "Fbpost", "message")
 
 Run `reload` in the sbt console and inspect the generated code again with `printJsonModels`. The `message` field is now of type `Option[String]`:
 
     [info] /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-    [info] package models.json.fbpost
+    [info] package jsonmodels.fbpost
     [info] 
     [info] case class Fbpost(
     [info]   id: String,
@@ -290,7 +289,7 @@ The fields `message` and `full_picture` of the generated case class will be opti
 Generated case classes:
 
     /** MACHINE-GENERATED CODE. DO NOT EDIT DIRECTLY */
-    package models.json.facebook
+    package jsonmodels.facebook
 
     case class Facebook(
         posts: Posts,
@@ -407,7 +406,7 @@ Note that there are no case classes `Northeast` and `Southwest` generated. Inste
 
 ### Why is the generated code ignored by IntelliJ?
 
-If the generated code is ignored by the compiler, in the **Project** tool window include the folder `target/scala-{version}/src_managed/main` by selecting **Mark Directory as | Generated Source Root** through the context menu, as described [here](https://www.jetbrains.com/help/idea/configuring-content-roots.html#d85322e277).
+If the generated code is ignored by the compiler, in the **Project** tool window include the folder `target/scala-{version}/src_managed` by selecting **Mark Directory as | Generated Source Root** through the context menu, as described [here](https://www.jetbrains.com/help/idea/configuring-content-roots.html#d85322e277).
 
 ## Contributing
 
