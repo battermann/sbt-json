@@ -37,7 +37,7 @@ Install the plugin according to the [sbt documentation](http://www.scala-sbt.org
 
 ### Edit `project/plugins.sbt`
 
-    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.2.4")
+    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.3.1")
 
 ### Edit `build.sbt`
 
@@ -157,7 +157,7 @@ The interpreters can be set like this in the `build.sbt` file:
 
     jsonInterpreter := plainCaseClasses
     
-or if play-json-formats should be generated:
+or if play-json-formats should be generated (which is the default behavior):
 
     jsonInterpreter := plainCaseClasses.withPlayJsonFormats
 
