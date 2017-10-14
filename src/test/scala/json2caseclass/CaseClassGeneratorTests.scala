@@ -1,8 +1,8 @@
 package json2caseclass
 
-import json2caseclass.CaseClassGenerator.generate
-import json2caseclass.CaseClassToStringInterpreter._
-import json2caseclass.SchemaExtractorOptions._
+import CaseClassGenerator.generate
+import json2caseclass.implementation.CaseClassToStringInterpreter._
+import json2caseclass.implementation.SchemaExtractor._
 import json2caseclass.model.CaseClass.{ClassFieldName, ClassName}
 import json2caseclass.model.Types._
 import json2caseclass.model.{ArrayEmpty, Config, JsonContainsNoObjects}

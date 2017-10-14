@@ -1,8 +1,7 @@
-package json2caseclass
+package json2caseclass.implementation
 
-import json2caseclass.model.Types.Interpreter
+import json2caseclass.model.Types.{Interpreter, _}
 import json2caseclass.model._
-import json2caseclass.model.Types._
 
 object CaseClassToStringInterpreter {
 

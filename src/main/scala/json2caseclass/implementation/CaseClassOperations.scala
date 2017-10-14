@@ -1,4 +1,4 @@
-package json2caseclass
+package json2caseclass.implementation
 
 import java.util.UUID
 
@@ -7,7 +7,7 @@ import json2caseclass.model.ScalaType._
 import json2caseclass.model.{CaseClass, ScalaObject, ScalaOption, ScalaType}
 
 object CaseClassOperations {
-  def rename(makeUnique: (Set[String], ClassName) => Option[ClassName], caseClasses: Seq[CaseClass]): Seq[CaseClass] = {
+  def renameAmbiguous(makeUnique: (Set[String], ClassName) => Option[ClassName], caseClasses: Seq[CaseClass]): Seq[CaseClass] = {
     val alternativeNames = findAlternativeNames(makeUnique, caseClasses)
     rename(caseClasses, alternativeNames)
   }

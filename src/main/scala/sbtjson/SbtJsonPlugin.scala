@@ -3,12 +3,12 @@ package sbtjson
 import java.io.File
 
 import cats.implicits._
-import json2caseclass.SchemaExtractorOptions.{JsValueFilter, _}
 import json2caseclass.model.CaseClass._
 import json2caseclass.model.Config
 import json2caseclass.model.Types.Interpreter
 import json2caseclass.model.Types._
-import json2caseclass.{CaseClassGenerator, _}
+import json2caseclass._
+import json2caseclass.implementation.{CaseClassToStringInterpreter, SchemaExtractor}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -130,11 +130,11 @@ object SbtJsonPlugin extends AutoPlugin {
       def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
     }
 
-    val allJsValues: JsValueFilter = SchemaExtractorOptions.allJsValues
+    val allJsValues: JsValueFilter = SchemaExtractor.allJsValues
 
     implicit class JsValueFilterOptions(jsValueFilter: JsValueFilter) {
-      def exceptEmptyArrays = SchemaExtractorOptions.exceptEmptyArrays(jsValueFilter)
-      def exceptNullValues = SchemaExtractorOptions.exceptNullValues(jsValueFilter)
+      def exceptEmptyArrays = SchemaExtractor.exceptEmptyArrays(jsValueFilter)
+      def exceptNullValues = SchemaExtractor.exceptNullValues(jsValueFilter)
     }
   }
 

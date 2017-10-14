@@ -1,4 +1,4 @@
-package json2caseclass
+package json2caseclass.implementation
 
 import cats.implicits._
 import json2caseclass.model.CaseClass._

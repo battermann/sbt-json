@@ -1,4 +1,4 @@
-package json2caseclass
+package json2caseclass.implementation
 
 import json2caseclass.model.CaseClass._
 

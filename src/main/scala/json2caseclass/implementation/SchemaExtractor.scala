@@ -1,13 +1,12 @@
-package json2caseclass
+package json2caseclass.implementation
 
 import java.util.UUID
 
 import cats.data.ReaderWriterStateT._
 import cats.implicits._
-import json2caseclass.SchemaExtractorOptions.RootTypeName
 import json2caseclass.model.Schema._
+import json2caseclass.model.Types.{ErrorOr, ErrorRWSOr, JsValueFilter, RootTypeName}
 import json2caseclass.model._
-import json2caseclass.model.Types.{ErrorOr, ErrorRWSOr}
 import play.api.libs.json._
 
 object SchemaExtractor {
@@ -33,8 +32,8 @@ object SchemaExtractor {
       _ <- modify[ErrorOr, Environment, Unit, UUID](uuid => UUID.nameUUIDFromBytes(uuid.toString.getBytes))
     } yield SchemaObject(
       id.toSchemaObjectId,
-      env.nameGenerator.genClassName(name),
-      fieldSchemas.map { case (n, v) => (env.nameGenerator.genFieldName(n), v) }
+      env.nameTransformer.transformClassName(name),
+      fieldSchemas.map { case (n, v) => (env.nameTransformer.transformFieldName(n), v) }
     )
   }
 
@@ -75,7 +74,7 @@ object SchemaExtractor {
         Right(SchemaArray(first))
       } else if (schemas forall isObject) {
         val schema = SchemaObject(
-          UUID.randomUUID().toSchemaObjectId, env.nameGenerator.genClassName(name),
+          UUID.randomUUID().toSchemaObjectId, env.nameTransformer.transformClassName(name),
           unify(schemas))
         Right(SchemaArray(schema))
       } else {
@@ -106,5 +105,26 @@ object SchemaExtractor {
 
     val combinedFields = required ++ optionals.map { case (n, s) => (n, SchemaOption(s)) }
     combinedFields.asInstanceOf[List[(SchemaFieldName, Schema)]]
+  }
+
+  val allJsValues: JsValueFilter = _ => true
+
+  val exceptEmptyArrays: JsValueFilter => JsValueFilter = {
+    include => {
+      case JsArray(values) if values.isEmpty => false
+      case jsValue => include(jsValue)
+    }
+  }
+
+  val exceptNullValues: JsValueFilter => JsValueFilter = {
+    include => {
+      case JsNull => false
+      case jsValue => include(jsValue)
+    }
+  }
+
+  implicit class IncludeOptions(include: JsValueFilter) {
+    def exceptEmptyArrays = SchemaExtractor.exceptEmptyArrays(include)
+    def exceptNullValues = SchemaExtractor.exceptNullValues(include)
   }
 }

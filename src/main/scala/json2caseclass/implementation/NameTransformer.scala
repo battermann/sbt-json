@@ -1,9 +1,14 @@
-package json2caseclass
+package json2caseclass.implementation
 
+import json2caseclass.model
 import json2caseclass.model.Schema._
 import json2caseclass.model.Types.Suffix
 
-object SchemaNameGeneratorImpl {
+object NameTransformer {
+  def apply(suffix: Suffix): model.NameTransformer = model.NameTransformer(
+    NameTransformer.generateCaseClassName(suffix),
+    NameTransformer.generateFieldName
+  )
 
   def generateCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
     if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(objectName.toLowerCase)) {

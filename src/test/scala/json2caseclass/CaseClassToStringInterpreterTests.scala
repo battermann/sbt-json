@@ -2,7 +2,7 @@ package json2caseclass
 
 import java.util.UUID
 
-import json2caseclass.CaseClassToStringInterpreter._
+import json2caseclass.implementation.CaseClassToStringInterpreter._
 import json2caseclass.model.CaseClass._
 import json2caseclass.model.ScalaType._
 import json2caseclass.model.{CaseClass, ScalaObject}
