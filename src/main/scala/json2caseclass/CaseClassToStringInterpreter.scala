@@ -1,9 +1,8 @@
 package json2caseclass
 
-import json2caseclass.SchemaExtractorOptions.JsValueFilter
-import json2caseclass.model.Interpreter.Interpreter
+import json2caseclass.model.Types.Interpreter
 import json2caseclass.model._
-import json2caseclass.model.caseClassSource._
+import json2caseclass.model.Types._
 
 object CaseClassToStringInterpreter {
 

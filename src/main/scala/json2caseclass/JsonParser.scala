@@ -1,6 +1,6 @@
 package json2caseclass
 
-import json2caseclass.model.json.JsonString
+import json2caseclass.model.Types.JsonString
 import json2caseclass.model.{CaseClassGenerationFailure, JsonParseFailure}
 import play.api.libs.json.{JsValue, Json}
 

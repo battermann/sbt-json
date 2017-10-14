@@ -6,8 +6,8 @@ import cats.implicits._
 import json2caseclass.SchemaExtractorOptions.{JsValueFilter, _}
 import json2caseclass.model.CaseClass._
 import json2caseclass.model.Config
-import json2caseclass.model.Interpreter.Interpreter
-import json2caseclass.model.json._
+import json2caseclass.model.Types.Interpreter
+import json2caseclass.model.Types._
 import json2caseclass.{CaseClassGenerator, _}
 import sbt.Keys._
 import sbt._

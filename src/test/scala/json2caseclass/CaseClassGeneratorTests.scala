@@ -4,7 +4,7 @@ import json2caseclass.CaseClassGenerator.generate
 import json2caseclass.CaseClassToStringInterpreter._
 import json2caseclass.SchemaExtractorOptions._
 import json2caseclass.model.CaseClass.{ClassFieldName, ClassName}
-import json2caseclass.model.json.ToJsonString
+import json2caseclass.model.Types._
 import json2caseclass.model.{ArrayEmpty, Config, JsonContainsNoObjects}
 import org.scalatest._
 import play.api.libs.json.{Json, OFormat}

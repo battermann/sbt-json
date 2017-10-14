@@ -7,7 +7,7 @@ import cats.implicits._
 import json2caseclass.SchemaExtractorOptions.RootTypeName
 import json2caseclass.model.Schema._
 import json2caseclass.model._
-import json2caseclass.model.caseClassGenerator.{ErrorOr, ErrorRWSOr}
+import json2caseclass.model.Types.{ErrorOr, ErrorRWSOr}
 import play.api.libs.json._
 
 object SchemaExtractor {

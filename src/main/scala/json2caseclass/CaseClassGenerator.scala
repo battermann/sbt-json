@@ -7,8 +7,7 @@ import json2caseclass.CaseClassNameGenerator._
 import json2caseclass.SchemaExtractorOptions.RootTypeName
 import json2caseclass.model.CaseClass.{ClassFieldName, ClassName}
 import json2caseclass.model._
-import json2caseclass.model.caseClassSource.CaseClassSource
-import json2caseclass.model.json.JsonString
+import json2caseclass.model.Types._
 
 object CaseClassGenerator {
 

@@ -1,7 +1,7 @@
 package json2caseclass
 
 import json2caseclass.model.Schema._
-import json2caseclass.model.suffix._
+import json2caseclass.model.Types.Suffix
 
 object SchemaNameGeneratorImpl {
 

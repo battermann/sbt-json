@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.data.ReaderWriterStateT
 import cats.implicits._
-import json2caseclass.model.caseClassGenerator.{ErrorOr, ErrorRWSOr}
+import json2caseclass.model.Types.{ErrorOr, ErrorRWSOr}
 
 object ? {
   def <~[A](x: A): ErrorRWSOr[A] = x.pure[ErrorRWSOr]
