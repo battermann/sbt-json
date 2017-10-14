@@ -1,12 +1,12 @@
-package j2cgen
+package json2caseclass
 
 import java.util.UUID
 
-import j2cgen.models.CaseClass.{ClassFieldName, ClassName}
-import j2cgen.models.ScalaType._
-import j2cgen.models.{CaseClass, ScalaObject, ScalaOption, ScalaType}
+import json2caseclass.model.CaseClass.{ClassFieldName, ClassName}
+import json2caseclass.model.ScalaType._
+import json2caseclass.model.{CaseClass, ScalaObject, ScalaOption, ScalaType}
 
-object CaseClassManipulator {
+object CaseClassOperations {
   def rename(makeUnique: (Set[String], ClassName) => Option[ClassName], caseClasses: Seq[CaseClass]): Seq[CaseClass] = {
     val alternativeNames = findAlternativeNames(makeUnique, caseClasses)
     rename(caseClasses, alternativeNames)
@@ -29,17 +29,17 @@ object CaseClassManipulator {
     caseClasses: Seq[CaseClass]): Map[UUID, ClassName] = {
     def alternativeNamesRec(
       ccs: Seq[CaseClass],
-      alreadyReservedNames: Set[String],
+      alreadyTakenNames: Set[String],
       acc: Map[UUID, ClassName]): Map[UUID, ClassName] = {
 
       ccs match {
         case Nil => acc
         case CaseClass(id, name, _) :: tail =>
-          makeUnique(alreadyReservedNames, name) match {
+          makeUnique(alreadyTakenNames, name) match {
             case Some(uniqueName) =>
-              alternativeNamesRec(tail, alreadyReservedNames + uniqueName, acc + (id -> uniqueName))
+              alternativeNamesRec(tail, alreadyTakenNames + uniqueName, acc + (id -> uniqueName))
             case None =>
-              alternativeNamesRec(tail, alreadyReservedNames + name, acc)
+              alternativeNamesRec(tail, alreadyTakenNames + name, acc)
           }
       }
     }

@@ -1,8 +1,9 @@
-package j2cgen.models
+package json2caseclass.model
 
 import java.util.UUID
 
-import j2cgen.models.ScalaType.{ScalaObjectId, ScalaObjectName}
+import json2caseclass.model.ScalaType.{ScalaObjectId, ScalaObjectName}
+import shapeless.tag
 import shapeless.tag.@@
 
 sealed trait ScalaType
@@ -21,10 +22,10 @@ object ScalaType {
   type ScalaObjectName = String @@ ScalaObjectNameTag
 
   implicit class ToScalaObjectId(uuid: UUID) {
-    def toScalaObjectId: ScalaObjectId = uuid.asInstanceOf[ScalaObjectId]
+    def toScalaObjectId: ScalaObjectId = tag[ScalaObjectIdTag][UUID](uuid)
   }
 
   implicit class ToScalaObjectName(name: String) {
-    def toScalaObjectName: ScalaObjectName = name.asInstanceOf[ScalaObjectName]
+    def toScalaObjectName: ScalaObjectName = tag[ScalaObjectNameTag][String](name)
   }
 }

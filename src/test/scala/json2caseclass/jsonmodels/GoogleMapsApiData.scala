@@ -1,4 +1,4 @@
-package j2cgen.jsonmodels
+package json2caseclass.jsonmodels
 
 import play.api.libs.json.Json
 

@@ -1,6 +1,6 @@
 package sbtjson
 
-import j2cgen.models.CaseClassGenerationFailure
+import json2caseclass.model.CaseClassGenerationFailure
 
 sealed trait SbtJsonFailure
 case class CaseClassSourceGenFailure(fileNameOrUrl: String, err: CaseClassGenerationFailure) extends SbtJsonFailure

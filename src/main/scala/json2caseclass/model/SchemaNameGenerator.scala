@@ -1,6 +1,6 @@
-package j2cgen.models
+package json2caseclass.model
 
-import j2cgen.models.Schema.{SchemaFieldName, SchemaObjectName}
+import json2caseclass.model.Schema.{SchemaFieldName, SchemaObjectName}
 
 case class SchemaNameGenerator(
   genClassName: String => SchemaObjectName,

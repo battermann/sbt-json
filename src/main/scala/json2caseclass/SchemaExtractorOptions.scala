@@ -1,6 +1,7 @@
-package j2cgen
+package json2caseclass
 
 import play.api.libs.json.{JsArray, JsNull, JsValue}
+import shapeless.tag
 import shapeless.tag.@@
 
 object SchemaExtractorOptions {
@@ -12,7 +13,7 @@ object SchemaExtractorOptions {
   type RootTypeName = String @@ RootTypeNameTag
 
   implicit class ToRootTypeName(name: String) {
-    def toRootTypeName: RootTypeName = name.asInstanceOf[RootTypeName]
+    def toRootTypeName: RootTypeName = tag[RootTypeNameTag][String](name)
   }
 
   val allJsValues: JsValueFilter = _ => true

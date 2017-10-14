@@ -1,13 +1,13 @@
-package j2cgen
+package json2caseclass
 
 import java.util.UUID
 
-import j2cgen.models.CaseClass._
-import j2cgen.models.ScalaType._
-import j2cgen.models.{CaseClass, ScalaObject}
+import json2caseclass.model.CaseClass._
+import json2caseclass.model.ScalaType._
+import json2caseclass.model.{CaseClass, ScalaObject}
 import org.scalatest._
 import CaseClassToStringInterpreter._
-import j2cgen.models.Interpreter.Interpreter
+import json2caseclass.model.Interpreter.Interpreter
 
 class CaseClassToStringInterpreterTests extends FlatSpec with Matchers {
 

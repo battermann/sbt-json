@@ -1,5 +1,6 @@
-package j2cgen.models
+package json2caseclass.model
 
+import shapeless.tag
 import shapeless.tag.@@
 
 object json {
@@ -7,6 +8,6 @@ object json {
   type JsonString = String @@ JsonStringTag
 
   implicit class ToJsonString(json: String) {
-    def toJsonString: JsonString = json.asInstanceOf[JsonString]
+    def toJsonString: JsonString = tag[JsonStringTag][String](json)
   }
 }

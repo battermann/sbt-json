@@ -1,9 +1,9 @@
-package j2cgen
+package json2caseclass
 
-import j2cgen.SchemaExtractorOptions.JsValueFilter
-import j2cgen.models.Interpreter.Interpreter
-import j2cgen.models._
-import j2cgen.models.caseClassSource._
+import json2caseclass.SchemaExtractorOptions.JsValueFilter
+import json2caseclass.model.Interpreter.Interpreter
+import json2caseclass.model._
+import json2caseclass.model.caseClassSource._
 
 object CaseClassToStringInterpreter {
 

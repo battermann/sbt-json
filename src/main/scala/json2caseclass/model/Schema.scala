@@ -1,8 +1,9 @@
-package j2cgen.models
+package json2caseclass.model
 
 import java.util.UUID
 
-import j2cgen.models.Schema.{SchemaFieldName, SchemaObjectId, SchemaObjectName}
+import json2caseclass.model.Schema.{SchemaFieldName, SchemaObjectId, SchemaObjectName}
+import shapeless.tag
 import shapeless.tag.@@
 
 sealed trait Schema
@@ -25,15 +26,15 @@ object Schema {
   type SchemaFieldName = String @@ SchemaFieldNameTag
 
   implicit class ToSchemaObjectId(uuid: UUID) {
-    def toSchemaObjectId: SchemaObjectId = uuid.asInstanceOf[SchemaObjectId]
+    def toSchemaObjectId: SchemaObjectId = tag[SchemaObjectIdTag][UUID](uuid)
   }
 
   implicit class ToSchemaFieldName(name: String) {
-    def toSchemaFieldName: SchemaFieldName = name.asInstanceOf[SchemaFieldName]
+    def toSchemaFieldName: SchemaFieldName = tag[SchemaFieldNameTag][String](name)
   }
 
   implicit class ToSchemaObjectName(name: String) {
-    def toSchemaObjectName: SchemaObjectName = name.asInstanceOf[SchemaObjectName]
+    def toSchemaObjectName: SchemaObjectName = tag[SchemaObjectNameTag][String](name)
   }
 
   def haveSameStructure(a: Schema, b: Schema): Boolean = {

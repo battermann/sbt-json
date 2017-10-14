@@ -1,5 +1,6 @@
-package j2cgen.models
+package json2caseclass.model
 
+import shapeless.tag
 import shapeless.tag.@@
 
 object caseClassSource {
@@ -7,6 +8,6 @@ object caseClassSource {
   type CaseClassSource = String @@ CaseClassSourceTag
 
   implicit class ToCaseClassSource(caseClassSource: String) {
-    def toCaseClassSource: CaseClassSource = caseClassSource.asInstanceOf[CaseClassSource]
+    def toCaseClassSource: CaseClassSource = tag[CaseClassSourceTag][String](caseClassSource)
   }
 }

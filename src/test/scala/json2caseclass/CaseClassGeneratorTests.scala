@@ -1,11 +1,11 @@
-package j2cgen
+package json2caseclass
 
-import j2cgen.CaseClassGenerator.generate
-import j2cgen.CaseClassToStringInterpreter._
-import j2cgen.SchemaExtractorOptions._
-import j2cgen.models.CaseClass.{ClassFieldName, ClassName}
-import j2cgen.models.json.ToJsonString
-import j2cgen.models.{ArrayEmpty, JsonContainsNoObjects}
+import json2caseclass.CaseClassGenerator.generate
+import json2caseclass.CaseClassToStringInterpreter._
+import json2caseclass.SchemaExtractorOptions._
+import json2caseclass.model.CaseClass.{ClassFieldName, ClassName}
+import json2caseclass.model.json.ToJsonString
+import json2caseclass.model.{ArrayEmpty, Config, JsonContainsNoObjects}
 import org.scalatest._
 import play.api.libs.json.{Json, OFormat}
 
@@ -24,7 +24,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
     val foo = R00t("world")
     val jsonString = Json.toJson(foo)
 
-    val caseClassSource = generate(interpreter = plainCaseClasses.withPlayJsonFormats)(jsonString.toString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(Config(interpreter = plainCaseClasses.withPlayJsonFormats))(jsonString.toString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -44,7 +44,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
   "Generated source from json of empty object" should "contain empty root class" in {
     val jsonString = "{}"
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected ="case class R00t(\n)\n"
 
@@ -61,7 +61,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName, Seq(("Foo", "x"), ("R00t", "foo"), ("R00t", "value2")).asInstanceOf[Seq[(ClassName, ClassFieldName)]])
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName, Seq(("Foo", "x"), ("R00t", "foo"), ("R00t", "value2")).asInstanceOf[Seq[(ClassName, ClassFieldName)]])
 
     val expected =
       """case class R00t(
@@ -87,7 +87,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |]
       """.stripMargin
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -118,7 +118,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate(include = exceptEmptyArrays(allJsValues))(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(Config(jsValueFilter = exceptEmptyArrays(allJsValues)))(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -141,7 +141,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate(include = exceptNullValues(allJsValues))(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(Config(jsValueFilter = exceptNullValues(allJsValues)))(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -164,7 +164,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -197,7 +197,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate(include = exceptEmptyArrays(allJsValues))(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(Config(jsValueFilter = exceptEmptyArrays(allJsValues)))(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -222,7 +222,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
         |""".stripMargin
 
-    val caseClassSource = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val caseClassSource = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -244,7 +244,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
   "Generated source from json with array of numbers" should "fail with JsonContainsNoObjects" in {
     val jsonString = "[ 1, 2, 3 ]"
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected = Left(JsonContainsNoObjects)
 
@@ -254,7 +254,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
   "Generated source from json with empty array root" should "fail with ArrayEmpty" in {
     val jsonString = "[]"
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected = Left(ArrayEmpty("R00t"))
 
@@ -264,7 +264,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
   "Generated names that equals a scala reserved word" should "have suffix or back-ticks" in {
     val jsonString = """{ "type": { "else": 1 } }"""
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected = Right(
       """case class R00t(
@@ -292,7 +292,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -325,7 +325,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -358,7 +358,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(
@@ -395,7 +395,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val resultOrError = generate()(jsonString.toJsonString, "R00t".toRootTypeName)
+    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
     val expected =
       """case class R00t(

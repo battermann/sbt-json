@@ -1,9 +1,9 @@
-package j2cgen
+package json2caseclass
 
 import cats.implicits._
-import j2cgen.models.CaseClass._
-import j2cgen.models.ScalaType._
-import j2cgen.models._
+import json2caseclass.model.CaseClass._
+import json2caseclass.model.ScalaType._
+import json2caseclass.model._
 import util.CollectionUtils._
 
 object SchemaToCaseClassConverter {

@@ -1,7 +1,7 @@
-package j2cgen
+package json2caseclass
 
-import j2cgen.models.Schema._
-import j2cgen.models.suffix._
+import json2caseclass.model.Schema._
+import json2caseclass.model.suffix._
 
 object SchemaNameGeneratorImpl {
 
