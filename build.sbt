@@ -5,7 +5,7 @@ resolvers ++= Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    version in ThisBuild := "0.3.1",
+    version in ThisBuild := "0.3.2",
     organization in ThisBuild := "com.github.battermann",
     scalaVersion := "2.10.6",
     sbtPlugin := true,
