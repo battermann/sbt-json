@@ -28,13 +28,11 @@ object SchemaExtractor {
       fieldSchemas <- fields
         .filter { case (_, value) => env.jsValueFilter(value) }
         .map { case (fieldName, value) => extractSchemaFromJsValue(fieldName, value) }.sequence
-      id <- get[ErrorOr, Environment, Unit, UUID]
-      _ <- modify[ErrorOr, Environment, Unit, UUID](uuid => UUID.nameUUIDFromBytes(uuid.toString.getBytes))
-    } yield SchemaObject(
-      id.toSchemaObjectId,
-      env.nameTransformer.transformClassName(name),
-      fieldSchemas.map { case (n, v) => (env.nameTransformer.transformFieldName(n), v) }
-    )
+      schema <- mkSchemaObject(
+        env.nameTransformer.transformClassName(name),
+        fieldSchemas.map { case (n, v) => (env.nameTransformer.transformFieldName(n), v) }
+      )
+    } yield schema
   }
 
   private def extractSchemaFromJsValue(name: String, value: JsValue): ErrorRWSOr[(String, Schema)] = {
@@ -70,18 +68,29 @@ object SchemaExtractor {
         .map(value => extractSchemaFromJsValue(name, value).map(_._2))
         .sequence
       first <- ? <~ schemas.headOption.toRight(ArrayEmpty(name))
-      schemaOrError = if (schemas forall (_ == first)) {
-        Right(SchemaArray(first))
+      schemaErrorRWSOr = if (schemas forall (_ == first)) {
+        ? <~ Right(SchemaArray(first))
       } else if (schemas forall isObject) {
-        val schema = SchemaObject(
-          UUID.randomUUID().toSchemaObjectId, env.nameTransformer.transformClassName(name),
+        mkSchemaObject(
+          env.nameTransformer.transformClassName(name),
           unify(schemas))
-        Right(SchemaArray(schema))
+          .map(SchemaArray)
       } else {
-        Left(ArrayTypeNotConsistent(name))
+        ? <~ Left(ArrayTypeNotConsistent(name))
       }
-      schema <- ? <~ schemaOrError
+      schema <- schemaErrorRWSOr
     } yield schema
+  }
+
+  private def mkSchemaObject(name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) = {
+    for {
+      id <- get[ErrorOr, Environment, Unit, UUID]
+      _ <- modify[ErrorOr, Environment, Unit, UUID](uuid => UUID.nameUUIDFromBytes(uuid.toString.getBytes))
+    } yield SchemaObject(
+      id.toSchemaObjectId,
+      name,
+      fields
+    )
   }
 
   private def unify(schemas: List[Schema]): List[(SchemaFieldName, Schema)] = {
@@ -125,6 +134,8 @@ object SchemaExtractor {
 
   implicit class IncludeOptions(include: JsValueFilter) {
     def exceptEmptyArrays = SchemaExtractor.exceptEmptyArrays(include)
+
     def exceptNullValues = SchemaExtractor.exceptNullValues(include)
   }
+
 }
