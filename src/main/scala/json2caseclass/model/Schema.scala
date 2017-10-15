@@ -1,8 +1,6 @@
 package json2caseclass.model
 
-import java.util.UUID
-
-import json2caseclass.model.Schema.{SchemaFieldName, SchemaObjectId, SchemaObjectName}
+import json2caseclass.model.Schema.{SchemaFieldName, SchemaObjectName}
 import shapeless.tag
 import shapeless.tag.@@
 
@@ -12,22 +10,15 @@ case object SchemaString extends Schema
 case object SchemaBoolean extends Schema
 case object SchemaDouble extends Schema
 case class SchemaArray(schema: Schema) extends Schema
-case class SchemaObject(id: SchemaObjectId, name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) extends Schema
+case class SchemaObject(id: Int, name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) extends Schema
 
 object Schema {
-
-  trait SchemaObjectIdTag
-  type SchemaObjectId = UUID @@ SchemaObjectIdTag
 
   trait SchemaObjectNameTag
   type SchemaObjectName = String @@ SchemaObjectNameTag
 
   trait SchemaFieldNameTag
   type SchemaFieldName = String @@ SchemaFieldNameTag
-
-  implicit class ToSchemaObjectId(uuid: UUID) {
-    def toSchemaObjectId: SchemaObjectId = tag[SchemaObjectIdTag][UUID](uuid)
-  }
 
   implicit class ToSchemaFieldName(name: String) {
     def toSchemaFieldName: SchemaFieldName = tag[SchemaFieldNameTag][String](name)

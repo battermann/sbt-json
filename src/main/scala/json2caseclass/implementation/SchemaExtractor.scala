@@ -1,7 +1,5 @@
 package json2caseclass.implementation
 
-import java.util.UUID
-
 import cats.data.ReaderWriterStateT._
 import cats.implicits._
 import json2caseclass.model.Schema._
@@ -24,7 +22,7 @@ object SchemaExtractor {
 
   private def extractSchemaFromJsObjectFields(name: String, fields: List[(String, JsValue)]): ErrorRWSOr[Schema] = {
     for {
-      env <- ask[ErrorOr, Environment, Unit, UUID]
+      env <- ask[ErrorOr, Environment, Unit, Int]
       fieldSchemas <- fields
         .filter { case (_, value) => env.jsValueFilter(value) }
         .map { case (fieldName, value) => extractSchemaFromJsValue(fieldName, value) }.sequence
@@ -62,7 +60,7 @@ object SchemaExtractor {
 
   private def extractSchemaFromArray(name: String, values: List[JsValue]): ErrorRWSOr[Schema] = {
     for {
-      env <- ask[ErrorOr, Environment, Unit, UUID]
+      env <- ask[ErrorOr, Environment, Unit, Int]
       schemas <- values
         .filter(value => env.jsValueFilter(value))
         .map(value => extractSchemaFromJsValue(name, value).map(_._2))
@@ -84,10 +82,10 @@ object SchemaExtractor {
 
   private def mkSchemaObject(name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) = {
     for {
-      id <- get[ErrorOr, Environment, Unit, UUID]
-      _ <- modify[ErrorOr, Environment, Unit, UUID](uuid => UUID.nameUUIDFromBytes(uuid.toString.getBytes))
+      id <- get[ErrorOr, Environment, Unit, Int]
+      _ <- modify[ErrorOr, Environment, Unit, Int]((_: Int) + 1)
     } yield SchemaObject(
-      id.toSchemaObjectId,
+      id,
       name,
       fields
     )

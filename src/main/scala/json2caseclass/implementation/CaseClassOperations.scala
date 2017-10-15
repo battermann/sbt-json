@@ -26,11 +26,11 @@ object CaseClassOperations {
 
   private def findAlternativeNames(
     makeUnique: (Set[String], ClassName) => Option[ClassName],
-    caseClasses: Seq[CaseClass]): Map[UUID, ClassName] = {
+    caseClasses: Seq[CaseClass]): Map[Int, ClassName] = {
     def alternativeNamesRec(
       ccs: Seq[CaseClass],
       alreadyTakenNames: Set[String],
-      acc: Map[UUID, ClassName]): Map[UUID, ClassName] = {
+      acc: Map[Int, ClassName]): Map[Int, ClassName] = {
 
       ccs match {
         case Nil => acc
@@ -47,7 +47,7 @@ object CaseClassOperations {
     alternativeNamesRec(caseClasses, Set(), Map())
   }
 
-  private def rename(caseClasses: Seq[CaseClass], alternativeNames: Map[UUID, ClassName]): Seq[CaseClass] = {
+  private def rename(caseClasses: Seq[CaseClass], alternativeNames: Map[Int, ClassName]): Seq[CaseClass] = {
     def renameFieldTypes(fields: Seq[(ClassFieldName, ScalaType)]) = {
       fields.map {
         case f@(fName, ScalaObject(id, _)) =>

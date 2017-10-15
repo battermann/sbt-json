@@ -1,7 +1,5 @@
 package json2caseclass
 
-import java.util.UUID
-
 import cats.implicits._
 import json2caseclass.implementation.CaseClassNameGenerator._
 import json2caseclass.implementation._
@@ -30,6 +28,6 @@ object CaseClassGenerator {
       NameTransformer(conf.suffix)
     )
 
-    generate.runA(env, UUID.fromString("e61fef28-b115-11e7-abc4-cec278b6b50a"))
+    generate.runA(env, 0)
   }
 }

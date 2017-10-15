@@ -1,5 +1,7 @@
 package json2caseclass.implementation
 
+import java.util.UUID
+
 import cats.implicits._
 import json2caseclass.model.CaseClass._
 import json2caseclass.model.ScalaType._
@@ -60,7 +62,7 @@ object SchemaToCaseClassConverter {
         val caseClassFields = fields.map {
           case (fieldName, schema) => (fieldName.toClassFieldName, schemaToScalaType(schema))
         }
-        CaseClass(id.toClassId, name.toClassName, caseClassFields)
+        CaseClass(id, name.toClassName, caseClassFields)
     }
   }
 
@@ -71,7 +73,7 @@ object SchemaToCaseClassConverter {
       case SchemaBoolean => ScalaBoolean
       case SchemaDouble => ScalaDouble
       case SchemaArray(s) => ScalaSeq(schemaToScalaType(s))
-      case SchemaObject(id, name, _) => ScalaObject(id.toScalaObjectId, name.toScalaObjectName)
+      case SchemaObject(id, name, _) => ScalaObject(id, name.toScalaObjectName)
     }
   }
 }

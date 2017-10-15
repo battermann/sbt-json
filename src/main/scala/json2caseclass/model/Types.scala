@@ -43,5 +43,5 @@ object Types {
   type Interpreter = Seq[CaseClass] => CaseClassSource
 
   type ErrorOr[A] = Either[CaseClassGenerationFailure, A]
-  type ErrorRWSOr[A] = ReaderWriterStateT[ErrorOr, Environment, Unit, UUID, A]
+  type ErrorRWSOr[A] = ReaderWriterStateT[ErrorOr, Environment, Unit, Int, A]
 }

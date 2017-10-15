@@ -1,7 +1,5 @@
 package json2caseclass
 
-import java.util.UUID
-
 import json2caseclass.implementation.CaseClassToStringInterpreter._
 import json2caseclass.model.CaseClass._
 import json2caseclass.model.ScalaType._
@@ -11,25 +9,19 @@ import org.scalatest._
 class CaseClassToStringInterpreterTests extends FlatSpec with Matchers {
 
   "Sequence of case classes" should "be sorted by dependency for play-json formats" in {
-    val model1Id = UUID.randomUUID
-    val model2Id = UUID.randomUUID
-    val model3Id = UUID.randomUUID
-    val model4Id = UUID.randomUUID
-    val model5Id = UUID.randomUUID
-
     val caseClasses = Seq(
-      CaseClass(model1Id.toClassId, "Model1".toClassName, Seq("model3".toClassFieldName -> ScalaObject(model3Id.toScalaObjectId, "Model3".toScalaObjectName))),
+      CaseClass(0, "Model1".toClassName, Seq("model3".toClassFieldName -> ScalaObject(2, "Model3".toScalaObjectName))),
       CaseClass(
-        model2Id.toClassId,
+        1,
         "Model2".toClassName,
         Seq(
-          "model1".toClassFieldName -> ScalaObject(model1Id.toScalaObjectId, "Model1".toScalaObjectName),
-          "model4".toClassFieldName -> ScalaObject(model4Id.toScalaObjectId, "Model4".toScalaObjectName)
+          "model1".toClassFieldName -> ScalaObject(0, "Model1".toScalaObjectName),
+          "model4".toClassFieldName -> ScalaObject(3, "Model4".toScalaObjectName)
         )
       ),
-      CaseClass(model3Id.toClassId, "Model3".toClassName, Seq("model4".toClassFieldName -> ScalaObject(model4Id.toScalaObjectId, "Model4".toScalaObjectName))),
-      CaseClass(model4Id.toClassId, "Model4".toClassName, Nil),
-      CaseClass(model5Id.toClassId, "Model5".toClassName, Seq("model3".toClassFieldName -> ScalaObject(model3Id.toScalaObjectId, "Model3".toScalaObjectName)))
+      CaseClass(2, "Model3".toClassName, Seq("model4".toClassFieldName -> ScalaObject(3, "Model4".toScalaObjectName))),
+      CaseClass(3, "Model4".toClassName, Nil),
+      CaseClass(4, "Model5".toClassName, Seq("model3".toClassFieldName -> ScalaObject(2, "Model3".toScalaObjectName)))
     )
 
     val expected = """case class Model1(
