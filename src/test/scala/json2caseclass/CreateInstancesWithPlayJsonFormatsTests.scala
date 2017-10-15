@@ -1,6 +1,6 @@
-package j2cgen
+package json2caseclass
 
-import j2cgen.jsonmodels.{BingData, GoogleMapsApiData}
+import json2caseclass.jsonmodels.{BingData, GoogleMapsApiData}
 import org.scalatest._
 import play.api.libs.json.Json
 

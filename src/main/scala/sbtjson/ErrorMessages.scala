@@ -1,6 +1,6 @@
 package sbtjson
 
-import j2cgen.models._
+import json2caseclass.model._
 
 object ErrorMessages {
   def mkMessage(error: SbtJsonFailure): String = {

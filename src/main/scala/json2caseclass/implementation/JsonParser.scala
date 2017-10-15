@@ -1,7 +1,7 @@
-package j2cgen
+package json2caseclass.implementation
 
-import j2cgen.models.json.JsonString
-import j2cgen.models.{CaseClassGenerationFailure, JsonParseFailure}
+import json2caseclass.model.Types.JsonString
+import json2caseclass.model.{CaseClassGenerationFailure, JsonParseFailure}
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.{Failure, Success, Try}

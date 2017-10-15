@@ -1,8 +1,7 @@
-package j2cgen.models
+package json2caseclass.model
 
-import java.util.UUID
-
-import j2cgen.models.Schema.{SchemaFieldName, SchemaObjectId, SchemaObjectName}
+import json2caseclass.model.Schema.{SchemaFieldName, SchemaObjectName}
+import shapeless.tag
 import shapeless.tag.@@
 
 sealed trait Schema
@@ -11,12 +10,9 @@ case object SchemaString extends Schema
 case object SchemaBoolean extends Schema
 case object SchemaDouble extends Schema
 case class SchemaArray(schema: Schema) extends Schema
-case class SchemaObject(id: SchemaObjectId, name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) extends Schema
+case class SchemaObject(id: Int, name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) extends Schema
 
 object Schema {
-
-  trait SchemaObjectIdTag
-  type SchemaObjectId = UUID @@ SchemaObjectIdTag
 
   trait SchemaObjectNameTag
   type SchemaObjectName = String @@ SchemaObjectNameTag
@@ -24,16 +20,12 @@ object Schema {
   trait SchemaFieldNameTag
   type SchemaFieldName = String @@ SchemaFieldNameTag
 
-  implicit class ToSchemaObjectId(uuid: UUID) {
-    def toSchemaObjectId: SchemaObjectId = uuid.asInstanceOf[SchemaObjectId]
-  }
-
   implicit class ToSchemaFieldName(name: String) {
-    def toSchemaFieldName: SchemaFieldName = name.asInstanceOf[SchemaFieldName]
+    def toSchemaFieldName: SchemaFieldName = tag[SchemaFieldNameTag][String](name)
   }
 
   implicit class ToSchemaObjectName(name: String) {
-    def toSchemaObjectName: SchemaObjectName = name.asInstanceOf[SchemaObjectName]
+    def toSchemaObjectName: SchemaObjectName = tag[SchemaObjectNameTag][String](name)
   }
 
   def haveSameStructure(a: Schema, b: Schema): Boolean = {

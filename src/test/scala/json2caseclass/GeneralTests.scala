@@ -1,4 +1,4 @@
-package j2cgen
+package json2caseclass
 
 import org.scalatest._
 import play.api.libs.json.Json

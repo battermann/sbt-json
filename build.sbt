@@ -1,3 +1,7 @@
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
 
 lazy val root = (project in file("."))
   .settings(
@@ -11,11 +15,14 @@ lazy val root = (project in file("."))
       Resolver.sonatypeRepo("releases"),
       Resolver.sonatypeRepo("snapshots")
     ),
-    libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.2",
     libraryDependencies += compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1",
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0",
-    libraryDependencies += "org.typelevel" %% "cats" % "0.9.0"
+    libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.0-MF",
+    libraryDependencies ++= Seq(
+      "com.chuusai" %% "shapeless" % "2.3.2",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    )
   )
 
 lazy val mavenPublishingSettings: Seq[Def.Setting[_]] = Seq(
@@ -25,7 +32,7 @@ lazy val mavenPublishingSettings: Seq[Def.Setting[_]] = Seq(
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
     else
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
   licenses += ("MIT License", url("https://github.com/battermann/sbt-json/blob/master/LICENSE")),
   publishArtifact in Test := false,
@@ -38,6 +45,8 @@ lazy val mavenPublishingSettings: Seq[Def.Setting[_]] = Seq(
     )
   ),
   developers := List(
-    Developer(id="battermann", name="Leif Battermann", email="leifbattermann@gmail.com", url=url("http://github.com/battermann"))
+    Developer(
+      id = "battermann", name = "Leif Battermann", email = "leifbattermann@gmail.com",
+      url = url("http://github.com/battermann"))
   )
 )

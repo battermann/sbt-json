@@ -1,4 +1,4 @@
-package j2cgen.jsonmodels
+package json2caseclass.jsonmodels
 
 case class Images(
                    startdate: String,

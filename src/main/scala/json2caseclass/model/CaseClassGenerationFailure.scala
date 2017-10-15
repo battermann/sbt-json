@@ -1,4 +1,4 @@
-package j2cgen.models
+package json2caseclass.model
 
 sealed trait CaseClassGenerationFailure
 case class ValueIsNull(name: String) extends CaseClassGenerationFailure

@@ -3,11 +3,12 @@ package sbtjson
 import java.io.File
 
 import cats.implicits._
-import j2cgen.SchemaExtractorOptions.{JsValueFilter, _}
-import j2cgen.models.CaseClass._
-import j2cgen.models.Interpreter.Interpreter
-import j2cgen.models.json._
-import j2cgen.{CaseClassGenerator, _}
+import json2caseclass.model.CaseClass._
+import json2caseclass.model.Config
+import json2caseclass.model.Types.Interpreter
+import json2caseclass.model.Types._
+import json2caseclass._
+import json2caseclass.implementation.{CaseClassToStringInterpreter, SchemaExtractor}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -20,57 +21,52 @@ object SbtJsonPlugin extends AutoPlugin {
 
   private def generateCaseClassSourcesFromFiles(
     src: File,
-    interpreter: Interpreter,
-    include: JsValueFilter,
+    env: Config,
     optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
-    packageName: String) = {
+    packageName: String): Either[SbtJsonFailure, List[(String, String)]] = {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
     sourceFiles.toList.map { file =>
       val srcFile = src / file
       val name = file.take(file lastIndexOf '.')
       val json = Source.fromFile(srcFile).getLines.mkString
-      CaseClassGenerator.generate(include = include, interpreter = interpreter)(
+      CaseClassGenerator.generate(env)(
         json.toJsonString,
         name.capitalize.toRootTypeName, getOptionals(optionals, name, packageName))
         .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name, packageName)))
         .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
     }
-      .sequenceU
+      .sequence
   }
 
   private def generateCaseClassSourceFromUrls(
     urls: Seq[String],
-    interpreter: Interpreter,
-    include: JsValueFilter,
+    env: Config,
     optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
-    packageName: String) = {
+    packageName: String): Either[SbtJsonFailure, List[(String, String)]] = {
     urls.toList.map { url =>
       Http.request(url)
         .flatMap { json =>
           val name = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
-          CaseClassGenerator.generate(
-            include = include,
-            interpreter = interpreter)(
+          CaseClassGenerator.generate(env)(
             json.toJsonString, name.capitalize.toRootTypeName,
             getOptionals(optionals, name, packageName))
             .map(source => (name, addHeaderAndPackage(source, name, packageName)))
             .leftMap(err => CaseClassSourceGenFailure(url, err))
         }
     }
-      .sequenceU
+      .sequence
   }
 
   private def generateSourceFiles(
     src: File,
     dst: File,
     urls: Seq[String],
-    interpreter: Interpreter,
-    include: JsValueFilter,
+    env: Config,
     optionals: Map[String, Seq[(ClassName, ClassFieldName)]],
     packageName: String) = {
     for {
-      fromFiles <- generateCaseClassSourcesFromFiles(src, interpreter, include, optionals, packageName)
-      fromUrls <- generateCaseClassSourceFromUrls(urls, interpreter, include, optionals, packageName)
+      fromFiles <- generateCaseClassSourcesFromFiles(src, env, optionals, packageName)
+      fromUrls <- generateCaseClassSourceFromUrls(urls,env, optionals, packageName)
     } yield {
       val generatedSources = fromUrls ++ fromFiles
       if (generatedSources.nonEmpty) dst.mkdirs()
@@ -134,11 +130,11 @@ object SbtJsonPlugin extends AutoPlugin {
       def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
     }
 
-    val allJsValues: JsValueFilter = SchemaExtractorOptions.allJsValues
+    val allJsValues: JsValueFilter = SchemaExtractor.allJsValues
 
     implicit class JsValueFilterOptions(jsValueFilter: JsValueFilter) {
-      def exceptEmptyArrays = SchemaExtractorOptions.exceptEmptyArrays(jsValueFilter)
-      def exceptNullValues = SchemaExtractorOptions.exceptNullValues(jsValueFilter)
+      def exceptEmptyArrays = SchemaExtractor.exceptEmptyArrays(jsValueFilter)
+      def exceptNullValues = SchemaExtractor.exceptNullValues(jsValueFilter)
     }
   }
 
@@ -155,19 +151,21 @@ object SbtJsonPlugin extends AutoPlugin {
     printJsonModels := {
 
       val optionals = toOptionalsMap(jsonOptionals.value)
+      val env = Config(
+        jsValueFilter = jsValueFilter.value,
+        interpreter = jsonInterpreter.value
+      )
 
       val result = for {
         fromFiles <- generateCaseClassSourcesFromFiles(
           jsonSourcesDirectory.value,
-          jsonInterpreter.value,
-          jsValueFilter.value,
+          env,
           optionals,
           packageName.value
         )
         fromUrls <- generateCaseClassSourceFromUrls(
           jsonUrls.value,
-          jsonInterpreter.value,
-          jsValueFilter.value,
+          env,
           optionals,
           packageName.value
         )
@@ -178,13 +176,16 @@ object SbtJsonPlugin extends AutoPlugin {
     generateJsonModels := {
 
       val optionals = toOptionalsMap(jsonOptionals.value)
+      val env = Config(
+        jsValueFilter = jsValueFilter.value,
+        interpreter = jsonInterpreter.value
+      )
 
       generateSourceFiles(
         jsonSourcesDirectory.value,
         scalaSourceDir.value,
         jsonUrls.value,
-        jsonInterpreter.value,
-        jsValueFilter.value,
+        env,
         optionals,
         packageName.value
       )

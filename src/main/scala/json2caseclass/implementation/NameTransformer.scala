@@ -1,21 +1,30 @@
-package j2cgen
+package json2caseclass.implementation
 
-import j2cgen.models.Schema._
-import j2cgen.models.suffix._
+import json2caseclass.model
+import json2caseclass.model.Schema._
+import json2caseclass.model.Types.Suffix
 
-object SchemaNameGeneratorImpl {
+object NameTransformer {
+  def apply(suffix: Suffix): model.NameTransformer = model.NameTransformer(
+    NameTransformer.makeSafeCamelCaseCaseClassName(suffix),
+    NameTransformer.makeSafeFieldName
+  )
 
-  def generateCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
-    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(objectName.toLowerCase)) {
+  def makeSafeCamelCaseCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
+    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(
+      objectName.toLowerCase)) {
       s"${objectName.capitalize}$suffix".toSchemaObjectName
     } else {
       objectName
-        .capitalize
+        .split("_")
+        .map(_.capitalize)
+        .map(_.toSchemaObjectName)
+        .mkString
         .toSchemaObjectName
     }
   }
 
-  def generateFieldName(fieldName: String): SchemaFieldName = {
+  def makeSafeFieldName(fieldName: String): SchemaFieldName = {
     if (reservedWords.contains(fieldName.toLowerCase)) {
       s"`$fieldName`".toSchemaFieldName
     } else {
