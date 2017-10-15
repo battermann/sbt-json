@@ -27,8 +27,8 @@ object SchemaExtractor {
         .filter { case (_, value) => env.jsValueFilter(value) }
         .map { case (fieldName, value) => extractSchemaFromJsValue(fieldName, value) }.sequence
       schema <- mkSchemaObject(
-        env.nameTransformer.transformClassName(name),
-        fieldSchemas.map { case (n, v) => (env.nameTransformer.transformFieldName(n), v) }
+        env.nameTransformer.makeSafeCamelCaseClassName(name),
+        fieldSchemas.map { case (n, v) => (env.nameTransformer.makeSafeFieldName(n), v) }
       )
     } yield schema
   }
@@ -70,7 +70,7 @@ object SchemaExtractor {
         ? <~ Right(SchemaArray(first))
       } else if (schemas forall isObject) {
         mkSchemaObject(
-          env.nameTransformer.transformClassName(name),
+          env.nameTransformer.makeSafeCamelCaseClassName(name),
           unify(schemas))
           .map(SchemaArray)
       } else {

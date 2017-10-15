@@ -6,21 +6,25 @@ import json2caseclass.model.Types.Suffix
 
 object NameTransformer {
   def apply(suffix: Suffix): model.NameTransformer = model.NameTransformer(
-    NameTransformer.generateCaseClassName(suffix),
-    NameTransformer.generateFieldName
+    NameTransformer.makeSafeCamelCaseCaseClassName(suffix),
+    NameTransformer.makeSafeFieldName
   )
 
-  def generateCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
-    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(objectName.toLowerCase)) {
+  def makeSafeCamelCaseCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
+    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(
+      objectName.toLowerCase)) {
       s"${objectName.capitalize}$suffix".toSchemaObjectName
     } else {
       objectName
-        .capitalize
+        .split("_")
+        .map(_.capitalize)
+        .map(_.toSchemaObjectName)
+        .mkString
         .toSchemaObjectName
     }
   }
 
-  def generateFieldName(fieldName: String): SchemaFieldName = {
+  def makeSafeFieldName(fieldName: String): SchemaFieldName = {
     if (reservedWords.contains(fieldName.toLowerCase)) {
       s"`$fieldName`".toSchemaFieldName
     } else {

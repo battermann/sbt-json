@@ -70,4 +70,14 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
 
     geo.geometry.viewport.northeast.lat shouldBe 37.42426708029149
   }
+
+  "Snake case object name" should "be transformed to camel case" in {
+    import my.json.models.bar._
+
+    val json = JsonFile.readeJsonFile("bar")
+
+    val bar = Json.parse(json).as[Bar]
+
+    bar shouldEqual Bar(TestObj(42))
+  }
 }
