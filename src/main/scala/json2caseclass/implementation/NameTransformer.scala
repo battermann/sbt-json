@@ -16,20 +16,25 @@ object NameTransformer {
       s"${objectName.capitalize}$suffix".toSchemaObjectName
     } else {
       objectName
-        .split("_")
+        .split("[^a-zA-Z0-9]")
+        .filter(_.isEmpty)
         .map(_.capitalize)
-        .map(_.toSchemaObjectName)
         .mkString
         .toSchemaObjectName
     }
   }
 
   def makeSafeFieldName(fieldName: String): SchemaFieldName = {
-    if (reservedWords.contains(fieldName.toLowerCase)) {
+    if (reservedWords.contains(fieldName.toLowerCase) || containsInvalidChars(fieldName)) {
       s"`$fieldName`".toSchemaFieldName
     } else {
       fieldName.toSchemaFieldName
     }
+  }
+
+  def containsInvalidChars(name: String): Boolean = {
+    val invalidChars = "[^a-zA-Z0-9_]"
+    name.matches(invalidChars)
   }
 
   private val scalaTypes = Seq(
