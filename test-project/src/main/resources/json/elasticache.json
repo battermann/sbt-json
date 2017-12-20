@@ -1,0 +1,524 @@
+{
+  "atlas": {
+    "cloudwatch": {
+      "elasticache": {
+        "dimensions": [
+          "CacheClusterId",
+          "CacheNodeId"
+        ],
+        "metrics": [
+          {
+            "alias": "aws.elasticache.cpuUtilization",
+            "conversion": "max",
+            "name": "CPUUtilization"
+          },
+          {
+            "alias": "aws.elasticache.memoryFree",
+            "conversion": "max",
+            "name": "FreeableMemory"
+          },
+          {
+            "alias": "aws.elasticache.networkThroughput",
+            "conversion": "sum,rate",
+            "name": "NetworkBytesIn",
+            "tags": [
+              {
+                "key": "id",
+                "value": "in"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.networkThroughput",
+            "conversion": "sum,rate",
+            "name": "NetworkBytesOut",
+            "tags": [
+              {
+                "key": "id",
+                "value": "out"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.swapUsage",
+            "conversion": "max",
+            "name": "SwapUsage"
+          },
+          {
+            "alias": "aws.elasticache.itemsRemoved",
+            "conversion": "sum,rate",
+            "name": "Evictions",
+            "tags": [
+              {
+                "key": "id",
+                "value": "evicted"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.itemsRemoved",
+            "conversion": "sum,rate",
+            "name": "Reclaimed",
+            "tags": [
+              {
+                "key": "id",
+                "value": "reclaimed"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.numConnections",
+            "conversion": "max",
+            "name": "CurrConnections"
+          },
+          {
+            "alias": "aws.elasticache.numItems",
+            "conversion": "max",
+            "name": "CurrItems"
+          },
+          {
+            "alias": "aws.elasticache.connections",
+            "conversion": "sum,rate",
+            "name": "NewConnections"
+          },
+          {
+            "alias": "aws.elasticache.items",
+            "conversion": "sum,rate",
+            "name": "NewItems"
+          },
+          {
+            "alias": "aws.elasticache.memoryUsed",
+            "conversion": "max",
+            "name": "BytesUsedForCacheItems",
+            "tags": [
+              {
+                "key": "id",
+                "value": "cacheItems"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.memoryUsed",
+            "conversion": "max",
+            "name": "BytesUsedForHash",
+            "tags": [
+              {
+                "key": "id",
+                "value": "hashTables"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.slabsMoved",
+            "conversion": "sum",
+            "name": "SlabsMoved"
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "DecrHits",
+            "tags": [
+              {
+                "key": "id",
+                "value": "decr"
+              },
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "DecrMisses",
+            "tags": [
+              {
+                "key": "id",
+                "value": "decr"
+              },
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "IncrHits",
+            "tags": [
+              {
+                "key": "id",
+                "value": "incr"
+              },
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "IncrMisses",
+            "tags": [
+              {
+                "key": "id",
+                "value": "incr"
+              },
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "DeleteHits",
+            "tags": [
+              {
+                "key": "id",
+                "value": "delete"
+              },
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "DeleteMisses",
+            "tags": [
+              {
+                "key": "id",
+                "value": "delete"
+              },
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "GetHits",
+            "tags": [
+              {
+                "key": "id",
+                "value": "get"
+              },
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "GetMisses",
+            "tags": [
+              {
+                "key": "id",
+                "value": "get"
+              },
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "TouchHits",
+            "tags": [
+              {
+                "key": "id",
+                "value": "touch"
+              },
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "TouchMisses",
+            "tags": [
+              {
+                "key": "id",
+                "value": "touch"
+              },
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "CasHits",
+            "tags": [
+              {
+                "key": "id",
+                "value": "cas"
+              },
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "CasMisses",
+            "tags": [
+              {
+                "key": "id",
+                "value": "cas"
+              },
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "CasBadval",
+            "tags": [
+              {
+                "key": "id",
+                "value": "cas"
+              },
+              {
+                "key": "status",
+                "value": "badval"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "CmdGet",
+            "tags": [
+              {
+                "key": "id",
+                "value": "get"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "CmdSet",
+            "tags": [
+              {
+                "key": "id",
+                "value": "set"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "CmdFlush",
+            "tags": [
+              {
+                "key": "id",
+                "value": "flush"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "CmdConfigGet",
+            "tags": [
+              {
+                "key": "id",
+                "value": "configGet"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "CmdConfigSet",
+            "tags": [
+              {
+                "key": "id",
+                "value": "configSet"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "CmdTouch",
+            "tags": [
+              {
+                "key": "id",
+                "value": "touch"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "CacheHits",
+            "tags": [
+              {
+                "key": "status",
+                "value": "hit"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.requests",
+            "conversion": "sum,rate",
+            "name": "CacheMisses",
+            "tags": [
+              {
+                "key": "status",
+                "value": "miss"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.replicationThroughput",
+            "conversion": "sum,rate",
+            "name": "ReplicationBytes"
+          },
+          {
+            "alias": "aws.elasticache.replicationLag",
+            "conversion": "max",
+            "name": "ReplicationLag"
+          },
+          {
+            "alias": "aws.elasticache.saveInProgress",
+            "conversion": "max",
+            "name": "SaveInProgress"
+          },
+          {
+            "alias": "aws.elasticache.memoryUsed",
+            "conversion": "max",
+            "name": "BytesUsedForCache"
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "HyperLogLogBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "hyperLogLogBased"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "GetTypeCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "getType"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "HashBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "hashBased"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "KeyBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "keyBased"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "ListBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "listBased"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "SetBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "setBased"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "SetTypeCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "setType"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "SortedSetBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "sortedSetBased"
+              }
+            ]
+          },
+          {
+            "alias": "aws.elasticache.commands",
+            "conversion": "sum,rate",
+            "name": "StringBasedCmds",
+            "tags": [
+              {
+                "key": "id",
+                "value": "stringBased"
+              }
+            ]
+          }
+        ],
+        "namespace": "AWS/ElastiCache",
+        "period": "1m"
+      }
+    }
+  }
+}

@@ -52,7 +52,7 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
 //  }
 
   "Generated code from JSON document which contains a Scala type name" should "contain a class name with suffix" in {
-    import my.json.models.list._
+    import my.json.models.listmodel._
 
     val json = JsonFile.readeJsonFile("list")
 

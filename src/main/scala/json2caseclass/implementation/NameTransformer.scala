@@ -20,26 +20,29 @@ object NameTransformer {
     }
   }
 
-
   def makeSafeCamelCaseCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
+    normalizeName(suffix)(objectName).toSchemaObjectName
+  }
+
+  def normalizeName(suffix: Suffix)(objectName: String): String = {
     if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(
       objectName.toLowerCase)) {
-      s"${objectName.capitalize}$suffix".toSchemaObjectName
+      s"${objectName.capitalize}$suffix"
     } else {
       objectName
+        .replaceFirst("^[^a-zA-Z]", "")
         .split("[^a-zA-Z0-9]")
         .filter(_.nonEmpty)
         .map(_.capitalize)
         .mkString
-        .toSchemaObjectName
     }
   }
 
-
-
   def containsInvalidChars(name: String): Boolean = {
     val invalidChars = "[^a-zA-Z0-9_]"
-    Pattern.compile(invalidChars).matcher(name).find()
+    val invalidFirstChar = "^[^a-zA-Z_]"
+    Pattern.compile(invalidChars).matcher(name).find() ||
+    Pattern.compile(invalidFirstChar).matcher(name).find()
   }
 
   private val scalaTypes = Seq(
