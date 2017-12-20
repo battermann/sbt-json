@@ -116,8 +116,8 @@ object SbtJsonPlugin extends AutoPlugin {
     lazy val jsonOptionals: SettingKey[Seq[OptionalField]] = SettingKey[Seq[OptionalField]](
       "json-optionals",
       "Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField(\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
-    lazy val packageName: SettingKey[String] = SettingKey[String](
-      "package-name", "Package name for the generated case classes.")
+    lazy val packageNameForJsonModels: SettingKey[String] = SettingKey[String](
+      "package-name-for-json-models", "Package name for the generated case classes.")
     lazy val scalaSourceDir: SettingKey[File] = SettingKey[File]("scala-source-dir", "Path for generated case classes.")
 
     case class OptionalField(
@@ -148,7 +148,7 @@ object SbtJsonPlugin extends AutoPlugin {
     jsValueFilter := allJsValues,
     jsonInterpreter := plainCaseClasses.withPlayJsonFormats,
     jsonOptionals := Nil,
-    packageName := "jsonmodels",
+    packageNameForJsonModels := "jsonmodels",
     scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
 
@@ -163,13 +163,13 @@ object SbtJsonPlugin extends AutoPlugin {
           jsonSourcesDirectory.value,
           env,
           optionals,
-          packageName.value
+          packageNameForJsonModels.value
         )
         fromUrls <- generateCaseClassSourceFromUrls(
           jsonUrls.value,
           env,
           optionals,
-          packageName.value
+          packageNameForJsonModels.value
         )
       } yield fromFiles ++ fromUrls
 
@@ -189,7 +189,7 @@ object SbtJsonPlugin extends AutoPlugin {
         jsonUrls.value,
         env,
         optionals,
-        packageName.value
+        packageNameForJsonModels.value
       )
         .fold(
           err => throw new Exception(mkMessage(err)),
