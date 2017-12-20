@@ -8,7 +8,7 @@ import json2caseclass.model.Config
 import json2caseclass.model.Types.Interpreter
 import json2caseclass.model.Types._
 import json2caseclass._
-import json2caseclass.implementation.{CaseClassToStringInterpreter, SchemaExtractor}
+import json2caseclass.implementation.{CaseClassToStringInterpreter, NameTransformer, SchemaExtractor}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -27,11 +27,12 @@ object SbtJsonPlugin extends AutoPlugin {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
     sourceFiles.toList.map { file =>
       val srcFile = src / file
-      val name = file.take(file lastIndexOf '.')
+      val filename = file.take(file lastIndexOf '.')
+      val name = NameTransformer.normalizeName("Model".toSuffix)(filename).toRootTypeName
       val json = Source.fromFile(srcFile).getLines.mkString
       CaseClassGenerator.generate(env)(
         json.toJsonString,
-        name.capitalize.toRootTypeName, getOptionals(optionals, name, packageName))
+        name, getOptionals(optionals, name, packageName))
         .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name, packageName)))
         .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
     }
@@ -46,9 +47,10 @@ object SbtJsonPlugin extends AutoPlugin {
     urls.toList.map { url =>
       Http.request(url)
         .flatMap { json =>
-          val name = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
+          val nameFromUrl = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
+          val name = NameTransformer.normalizeName("Model".toSuffix)(nameFromUrl).toRootTypeName
           CaseClassGenerator.generate(env)(
-            json.toJsonString, name.capitalize.toRootTypeName,
+            json.toJsonString, name,
             getOptionals(optionals, name, packageName))
             .map(source => (name, addHeaderAndPackage(source, name, packageName)))
             .leftMap(err => CaseClassSourceGenFailure(url, err))
