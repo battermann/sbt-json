@@ -8,7 +8,7 @@ import json2caseclass.model.Config
 import json2caseclass.model.Types.Interpreter
 import json2caseclass.model.Types._
 import json2caseclass._
-import json2caseclass.implementation.{CaseClassToStringInterpreter, SchemaExtractor}
+import json2caseclass.implementation.{CaseClassToStringInterpreter, NameTransformer, SchemaExtractor}
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -27,11 +27,12 @@ object SbtJsonPlugin extends AutoPlugin {
     val sourceFiles = Option(src.list) getOrElse Array() filter (_ endsWith ".json")
     sourceFiles.toList.map { file =>
       val srcFile = src / file
-      val name = file.take(file lastIndexOf '.')
+      val filename = file.take(file lastIndexOf '.')
+      val name = NameTransformer.normalizeName("Model".toSuffix)(filename).toRootTypeName
       val json = Source.fromFile(srcFile).getLines.mkString
       CaseClassGenerator.generate(env)(
         json.toJsonString,
-        name.capitalize.toRootTypeName, getOptionals(optionals, name, packageName))
+        name, getOptionals(optionals, name, packageName))
         .map(generatedSource => (name, addHeaderAndPackage(generatedSource, name, packageName)))
         .leftMap(err => CaseClassSourceGenFailure(s"$name.json", err))
     }
@@ -46,9 +47,10 @@ object SbtJsonPlugin extends AutoPlugin {
     urls.toList.map { url =>
       Http.request(url)
         .flatMap { json =>
-          val name = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
+          val nameFromUrl = url.replaceFirst(".*\\/([^\\/\\.?]+).*", "$1")
+          val name = NameTransformer.normalizeName("Model".toSuffix)(nameFromUrl).toRootTypeName
           CaseClassGenerator.generate(env)(
-            json.toJsonString, name.capitalize.toRootTypeName,
+            json.toJsonString, name,
             getOptionals(optionals, name, packageName))
             .map(source => (name, addHeaderAndPackage(source, name, packageName)))
             .leftMap(err => CaseClassSourceGenFailure(url, err))
@@ -114,8 +116,8 @@ object SbtJsonPlugin extends AutoPlugin {
     lazy val jsonOptionals: SettingKey[Seq[OptionalField]] = SettingKey[Seq[OptionalField]](
       "json-optionals",
       "Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField(\"<package_name>\", \"<class_name>\", \"<field_name>\"))`")
-    lazy val packageName: SettingKey[String] = SettingKey[String](
-      "package-name", "Package name for the generated case classes.")
+    lazy val packageNameForJsonModels: SettingKey[String] = SettingKey[String](
+      "package-name-for-json-models", "Package name for the generated case classes.")
     lazy val scalaSourceDir: SettingKey[File] = SettingKey[File]("scala-source-dir", "Path for generated case classes.")
 
     case class OptionalField(
@@ -146,7 +148,7 @@ object SbtJsonPlugin extends AutoPlugin {
     jsValueFilter := allJsValues,
     jsonInterpreter := plainCaseClasses.withPlayJsonFormats,
     jsonOptionals := Nil,
-    packageName := "jsonmodels",
+    packageNameForJsonModels := "jsonmodels",
     scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
 
@@ -161,13 +163,13 @@ object SbtJsonPlugin extends AutoPlugin {
           jsonSourcesDirectory.value,
           env,
           optionals,
-          packageName.value
+          packageNameForJsonModels.value
         )
         fromUrls <- generateCaseClassSourceFromUrls(
           jsonUrls.value,
           env,
           optionals,
-          packageName.value
+          packageNameForJsonModels.value
         )
       } yield fromFiles ++ fromUrls
 
@@ -187,7 +189,7 @@ object SbtJsonPlugin extends AutoPlugin {
         jsonUrls.value,
         env,
         optionals,
-        packageName.value
+        packageNameForJsonModels.value
       )
         .fold(
           err => throw new Exception(mkMessage(err)),

@@ -1,7 +1,8 @@
 package json2caseclass.implementation
 
+import json2caseclass.model.CaseClass.ClassName
 import json2caseclass.model.Types.{Interpreter, _}
-import json2caseclass.model._
+import json2caseclass.model.{ScalaType, _}
 
 object CaseClassToStringInterpreter {
 
@@ -50,7 +51,23 @@ object CaseClassToStringInterpreter {
     val CaseClass(_, _, fields) = caseClass
 
     fields.forall {
-      case (_, ScalaObject(_, dependencyName)) =>
+      case o@(_, ScalaObject(_, _)) =>
+        typeExistsInUnresolvedDeps(alreadyDefined, o._2)
+      case (_, ScalaSeq(t)) =>
+        typeExistsInUnresolvedDeps(alreadyDefined, t)
+      case (_, ScalaOption(t)) =>
+        typeExistsInUnresolvedDeps(alreadyDefined, t)
+      case _ => true
+    }
+  }
+
+  private def typeExistsInUnresolvedDeps(alreadyDefined: Seq[CaseClass], scalaType: ScalaType): Boolean = {
+    scalaType match {
+      case ScalaOption(t) =>
+        typeExistsInUnresolvedDeps(alreadyDefined, t)
+      case ScalaSeq(t) =>
+        typeExistsInUnresolvedDeps(alreadyDefined, t)
+      case ScalaObject(_, dependencyName) =>
         alreadyDefined.exists {
           case CaseClass(_, name, _) => name == dependencyName
         }

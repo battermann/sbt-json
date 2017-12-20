@@ -1,0 +1,192 @@
+{
+  "atlas": {
+    "cloudwatch": {
+      "alb": {
+        "dimensions": [
+          "LoadBalancer"
+        ],
+        "metrics": [
+          {
+            "alias": "aws.alb.processedBytes",
+            "conversion": "sum,rate",
+            "name": "ProcessedBytes"
+          },
+          {
+            "alias": "aws.alb.activeConnectionCount",
+            "conversion": "sum",
+            "name": "ActiveConnectionCount"
+          },
+          {
+            "alias": "aws.alb.newConnections",
+            "conversion": "sum,rate",
+            "name": "NewConnectionCount"
+          },
+          {
+            "alias": "aws.alb.rejectedConnections",
+            "conversion": "sum,rate",
+            "name": "RejectedConnectionCount"
+          },
+          {
+            "alias": "aws.alb.consumedLCUs",
+            "conversion": "sum",
+            "name": "ConsumedLCUs"
+          }
+        ],
+        "namespace": "AWS/ApplicationELB",
+        "period": "1m"
+      },
+      "alb-tg-zone": {
+        "dimensions": [
+          "LoadBalancer",
+          "TargetGroup",
+          "AvailabilityZone"
+        ],
+        "metrics": [
+          {
+            "alias": "aws.alb.requests",
+            "conversion": "sum,rate",
+            "name": "RequestCount"
+          },
+          {
+            "alias": "aws.alb.backendResponses",
+            "conversion": "sum,rate",
+            "name": "HTTPCode_Target_2XX_Count",
+            "tags": [
+              {
+                "key": "status",
+                "value": "2xx"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.backendResponses",
+            "conversion": "sum,rate",
+            "name": "HTTPCode_Target_3XX_Count",
+            "tags": [
+              {
+                "key": "status",
+                "value": "3xx"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.backendResponses",
+            "conversion": "sum,rate",
+            "name": "HTTPCode_Target_4XX_Count",
+            "tags": [
+              {
+                "key": "status",
+                "value": "4xx"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.backendResponses",
+            "conversion": "sum,rate",
+            "name": "HTTPCode_Target_5XX_Count",
+            "tags": [
+              {
+                "key": "status",
+                "value": "5xx"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.targetErrors",
+            "conversion": "sum,rate",
+            "name": "TargetConnectionErrorCount",
+            "tags": [
+              {
+                "key": "error",
+                "value": "Connection"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.targetErrors",
+            "conversion": "sum,rate",
+            "name": "TargetTLSNegotiationErrorCount",
+            "tags": [
+              {
+                "key": "error",
+                "value": "TLSNegotiation"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.hostCount",
+            "conversion": "max",
+            "name": "HealthyHostCount",
+            "tags": [
+              {
+                "key": "id",
+                "value": "healthy"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.hostCount",
+            "conversion": "max",
+            "name": "UnHealthyHostCount",
+            "tags": [
+              {
+                "key": "id",
+                "value": "unhealthy"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.targetLatency",
+            "conversion": "timer",
+            "name": "TargetResponseTime"
+          }
+        ],
+        "namespace": "AWS/ApplicationELB",
+        "period": "1m"
+      },
+      "alb-zone": {
+        "dimensions": [
+          "LoadBalancer",
+          "AvailabilityZone"
+        ],
+        "metrics": [
+          {
+            "alias": "aws.alb.errors",
+            "conversion": "sum,rate",
+            "name": "HTTPCode_ELB_4XX_Count",
+            "tags": [
+              {
+                "key": "status",
+                "value": "4xx"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.errors",
+            "conversion": "sum,rate",
+            "name": "HTTPCode_ELB_5XX_Count",
+            "tags": [
+              {
+                "key": "status",
+                "value": "5xx"
+              }
+            ]
+          },
+          {
+            "alias": "aws.alb.clientErrors",
+            "conversion": "sum,rate",
+            "name": "ClientTLSNegotiationErrorCount",
+            "tags": [
+              {
+                "key": "error",
+                "value": "TLSNegotiation"
+              }
+            ]
+          }
+        ],
+        "namespace": "AWS/ApplicationELB",
+        "period": "1m"
+      }
+    }
+  }
+}

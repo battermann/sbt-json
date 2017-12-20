@@ -231,10 +231,10 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |
         |case class Objects(
         |  field5: Double,
-        |  field1: Option[String],
-        |  field2: Option[Double],
+        |  field4: Option[Seq[Double]],
         |  field3: Option[Boolean],
-        |  field4: Option[Seq[Double]]
+        |  field2: Option[Double],
+        |  field1: Option[String]
         |)
         |""".stripMargin
 

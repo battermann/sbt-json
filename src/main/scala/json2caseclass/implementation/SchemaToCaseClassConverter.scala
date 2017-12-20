@@ -1,7 +1,5 @@
 package json2caseclass.implementation
 
-import java.util.UUID
-
 import cats.implicits._
 import json2caseclass.model.CaseClass._
 import json2caseclass.model.ScalaType._

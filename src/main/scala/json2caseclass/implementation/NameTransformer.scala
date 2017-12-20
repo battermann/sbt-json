@@ -1,5 +1,7 @@
 package json2caseclass.implementation
 
+import java.util.regex.Pattern
+
 import json2caseclass.model
 import json2caseclass.model.Schema._
 import json2caseclass.model.Types.Suffix
@@ -10,26 +12,37 @@ object NameTransformer {
     NameTransformer.makeSafeFieldName
   )
 
-  def makeSafeCamelCaseCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
-    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(
-      objectName.toLowerCase)) {
-      s"${objectName.capitalize}$suffix".toSchemaObjectName
-    } else {
-      objectName
-        .split("_")
-        .map(_.capitalize)
-        .map(_.toSchemaObjectName)
-        .mkString
-        .toSchemaObjectName
-    }
-  }
-
   def makeSafeFieldName(fieldName: String): SchemaFieldName = {
-    if (reservedWords.contains(fieldName.toLowerCase)) {
+    if (reservedWords.contains(fieldName.toLowerCase)|| containsInvalidChars(fieldName)) {
       s"`$fieldName`".toSchemaFieldName
     } else {
       fieldName.toSchemaFieldName
     }
+  }
+
+  def makeSafeCamelCaseCaseClassName(suffix: Suffix)(objectName: String): SchemaObjectName = {
+    normalizeName(suffix)(objectName).toSchemaObjectName
+  }
+
+  def normalizeName(suffix: Suffix)(objectName: String): String = {
+    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(
+      objectName.toLowerCase)) {
+      s"${objectName.capitalize}$suffix"
+    } else {
+      objectName
+        .replaceFirst("^[^a-zA-Z]", "")
+        .split("[^a-zA-Z0-9]")
+        .filter(_.nonEmpty)
+        .map(_.capitalize)
+        .mkString
+    }
+  }
+
+  def containsInvalidChars(name: String): Boolean = {
+    val invalidChars = "[^a-zA-Z0-9_]"
+    val invalidFirstChar = "^[^a-zA-Z_]"
+    Pattern.compile(invalidChars).matcher(name).find() ||
+    Pattern.compile(invalidFirstChar).matcher(name).find()
   }
 
   private val scalaTypes = Seq(

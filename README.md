@@ -37,7 +37,7 @@ Install the plugin according to the [sbt documentation](http://www.scala-sbt.org
 
 ### Edit `project/plugins.sbt`
 
-    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.3.2")
+    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.4.0")
 
 ### Edit `build.sbt`
 
@@ -82,7 +82,7 @@ Another advantage of sbt-json is the optional generation of play-json formats th
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the `.json` files to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
 | jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField("<package_name>", "<class_name>", "<field_name>"))` |
-| packageName | `jsonmodels` | Package name for the generated case classes. |
+| packageNameForJsonModels | `jsonmodels` | Package name for the generated case classes. |
 
 ## Example
 

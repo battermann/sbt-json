@@ -8,4 +8,4 @@ libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
 jsValueFilter := allJsValues.exceptNullValues.exceptEmptyArrays
 jsonInterpreter := plainCaseClasses.withPlayJsonFormats
 jsonOptionals += OptionalField("fbpost", "Fbpost", "message")
-packageName := "my.json.models"
+packageNameForJsonModels := "my.json.models"
