@@ -151,7 +151,7 @@ object SbtJsonPlugin extends AutoPlugin {
     packageNameForJsonModels := "jsonmodels",
     scalaSourceDir := sourceManaged.value / "compiled_json",
     printJsonModels := {
-
+      val sLog = streams.value.log
       val optionals = toOptionalsMap(jsonOptionals.value)
       val env = Config(
         jsValueFilter = jsValueFilter.value,
@@ -173,7 +173,7 @@ object SbtJsonPlugin extends AutoPlugin {
         )
       } yield fromFiles ++ fromUrls
 
-      result.fold(err => streams.value.log.error(mkMessage(err)), _.foreach(s => streams.value.log.info(s._2)))
+      result.fold(err => sLog.error(mkMessage(err)), _.foreach(s => sLog.info(s._2)))
     },
     generateJsonModels := {
 

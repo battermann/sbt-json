@@ -6,5 +6,5 @@ import json2caseclass.model.Types.{ErrorOr, ErrorRWSOr}
 
 object ? {
   def <~[A](x: Either[CaseClassGenerationFailure, A]): ErrorRWSOr[A] =
-    ReaderWriterStateT.lift[ErrorOr, Environment, Unit, Int, A](x)
+    ReaderWriterStateT.liftF[ErrorOr, Environment, Unit, Int, A](x)
 }
