@@ -143,7 +143,7 @@ object SbtJsonPlugin extends AutoPlugin {
     jsonSourcesDirectory := baseDirectory.value / "src" / "main" / "resources" / "json",
     jsonUrls := Nil,
     jsValueFilter := allJsValues,
-    jsonInterpreter := plainCaseClasses.withPlayJsonFormats,
+    jsonInterpreter := plainCaseClasses,
     jsonOptionals := Nil,
     packageNameForJsonModels := "jsonmodels",
     scalaSourceDir := sourceManaged.value / "compiled_json",
