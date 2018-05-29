@@ -29,7 +29,7 @@ sbt-json also works with [circe](https://circe.github.io/circe/) for many JSON s
 
 ## Prerequisites
 
-0.13.5 <= sbt version < 1.0
+0.13.5 <= sbt version
 
 ## Installation
 
@@ -44,8 +44,10 @@ Install the plugin according to the [sbt documentation](http://www.scala-sbt.org
 Edit the `build.sbt` file to enable the plugin and to generate case class sources whenever the compile task is executed:
 
     enablePlugins(SbtJsonPlugin)
+    
+#### Optional JSON library
 
-If you want to use play-json add the play-json library dependency:
+If you want to use play-json e.g. add:
 
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
     
