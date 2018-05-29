@@ -11,6 +11,7 @@ import json2caseclass.model.Types.{
 }
 import json2caseclass.model._
 import play.api.libs.json._
+import scala.language.existentials
 
 object SchemaExtractor {
 

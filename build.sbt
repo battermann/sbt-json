@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
   .settings(
     version in ThisBuild := "0.4.0",
     organization in ThisBuild := "com.github.battermann",
-    scalaVersion := "2.10.6",
+    crossSbtVersions := List("0.13.17", "1.1.5"),
     sbtPlugin := true,
     name := "sbt-json",
     mavenPublishingSettings,
@@ -19,11 +19,11 @@ lazy val root = (project in file("."))
     libraryDependencies += compilerPlugin(
       "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1",
-    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0",
-    libraryDependencies += "org.typelevel" %% "cats-core" % "1.0.0-MF",
-    libraryDependencies += "com.lihaoyi" % "pprint_2.10" % "0.5.3",
+    libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.7",
+    libraryDependencies += "org.typelevel" %% "cats-core" % "1.1.0",
+    libraryDependencies += "com.lihaoyi" %% "pprint" % "0.5.3",
     libraryDependencies ++= Seq(
-      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.chuusai" %% "shapeless" % "2.3.3",
       compilerPlugin(
         "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
     )
