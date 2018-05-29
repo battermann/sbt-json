@@ -27,9 +27,11 @@ sbt-json integrates very well with the [play-json library](https://github.com/pl
 
 sbt-json also works with [circe](https://circe.github.io/circe/) for many JSON schemas as circe automatically derives the necessary type classes for the generated types. (see [example](https://github.com/battermann/sbt-json/blob/master/README.md#circe))
 
+Supporting the generation of implicit encoders and decoders for different JSON libraries other than play-json is planned for future versions.
+
 ## Prerequisites
 
-0.13.5 <= sbt version < 1.0
+0.13.5 <= sbt version
 
 ## Installation
 
@@ -37,15 +39,17 @@ Install the plugin according to the [sbt documentation](http://www.scala-sbt.org
 
 ### Edit `project/plugins.sbt`
 
-    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.3.1")
+    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.5.0")
 
 ### Edit `build.sbt`
 
 Edit the `build.sbt` file to enable the plugin and to generate case class sources whenever the compile task is executed:
 
     enablePlugins(SbtJsonPlugin)
+    
+#### Optional JSON library
 
-If you want to use play-json add the play-json library dependency:
+If you want to use play-json e.g. add:
 
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.0"
     
@@ -53,7 +57,7 @@ If you want to use play-json add the play-json library dependency:
 
 After a successful installation place one or more `.json` files containing sample JSON documents in the directory `src/main/resources/json/`.
 
-By default play-json formats will be generated. If you don't use play-json in your project add `jsonInterpreter := plainCaseClasses` to your `build.sbt` file and reload sbt.
+By default only the case classes will be generated. To generate play-json formats, add `jsonInterpreter := plainCaseClasses.withPlayJsonFormats` to your `build.sbt` file and reload sbt.
 
 On compile, case classes will be generated in `target/scala-{version}/src_managed/compiled_json/jsonmodels/{name}` where `name` will be the name of the corresponding `.json` file.
 
@@ -77,12 +81,12 @@ Another advantage of sbt-json is the optional generation of play-json formats th
 
 | name     | default | description |
 | -------- | ------- | ----------- |
-| jsonInterpreter | `plainCaseClasses.withPlayJsonFormats`    | Combinator that specifies which interpreter to use. (`plainCaseClasses` can be combined with `withPlayJsonFormats`) |
+| jsonInterpreter | `plainCaseClasses`    | Combinator that specifies which interpreter to use. (`plainCaseClasses` can be combined with `withPlayJsonFormats`: `plainCaseClasses.withPlayJsonFormats `) |
 | jsValueFilter     | `allJsValues`    | Combinator that specifies which JSON values should be in-/excluded for analyzation. (`allJsValues` can be combined with `exceptEmptyArrays` and `exceptNullValues`. Example: `allJsValues.exceptEmptyArrays` |
 | jsonSourcesDirectory  | `src/main/resources/json` | Path containing the `.json` files to analyze. |
 | jsonUrls  | `Nil` | List of urls that serve JSON data to be analyzed. |
 | jsonOptionals | `Nil` | Specify which fields should be optional, e.g. `jsonOptionals := Seq(OptionalField("<package_name>", "<class_name>", "<field_name>"))` |
-| packageName | `jsonmodels` | Package name for the generated case classes. |
+| packageNameForJsonModels | `jsonmodels` | Package name for the generated case classes. |
 
 ## Example
 
@@ -90,6 +94,7 @@ Another advantage of sbt-json is the optional generation of play-json formats th
 
 If you want to analyze JSON data form `https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US` and ignore empty arrays, add the following lines to the `build.sbt` file:
 
+    jsonInterpreter := plainCaseClasses.withPlayJsonFormats
     jsonUrls += "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
     jsValueFilter := allJsValues.exceptEmptyArrays
 
@@ -116,48 +121,44 @@ In the `buld.sbt` add the circe dependencies:
       "io.circe" %% "circe-parser"
     ).map(_ % circeVersion)
     
-It is important to set the interpreter to not generate play-json formats:
-
-    jsonInterpreter := plainCaseClasses
-    
 Now add a file or URL with the JSON sample, e.g.:
 
     jsonUrls += "https://api.coindesk.com/v1/bpi/currentprice.json"
     
 Use circe to decode the JSON data:
 
-      import io.circe.generic.auto._
-      import io.circe.parser._
-      import jsonmodels.currentprice._
+    import io.circe.generic.auto._
+    import io.circe.parser._
+    import jsonmodels.currentprice._      
+    
+    val url = "https://api.coindesk.com/v1/bpi/currentprice.json"
+    val rawJson = scala.io.Source.fromURL(url).mkString
+    val currentPriceOrError = decode[Currentprice](rawJson)
+    val output = currentPriceOrError fold (
+      err => err.getMessage,
+      currentPrice => {
+        val info = currentPrice.bpi.EUR.description
+        val priceInEuro = currentPrice.bpi.EUR.rate_float
+        val date = currentPrice.time.updated
+        s"Current Bitcoin price ($info): $priceInEuro (timestamp: $date)"
+      }
+    )
 
-      val url = "https://api.coindesk.com/v1/bpi/currentprice.json"
-      val rawJson = scala.io.Source.fromURL(url).mkString
-      val currentPriceOrError = decode[Currentprice](rawJson)
-      val output = currentPriceOrError fold (
-        err => err.getMessage,
-        currentPrice => {
-          val info = currentPrice.bpi.EUR.description
-          val priceInEuro = currentPrice.bpi.EUR.rate_float
-          val date = currentPrice.time.updated
-          s"Current Bitcoin price ($info): $priceInEuro (timestamp: $date)"
-        }
-      )
-
-      println(output)
+    println(output)
 
 ## Settings in depth
 
 ### jsonInterpreter
 
-The `jsonInterpreter` setting specifies if [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion will be generated. There are two options for this setting available, `plainCaseClasses` (default) and `plainCaseClasses.withPlayJsonFormats`. The type of the interpreter function is:
+With the `jsonInterpreter` setting additional generation features can be configured.
 
-    type Interpreter = Seq[CaseClass] => CaseClassSource
+Besides generating the case classes, we can specify to generate [play-json formats](https://www.playframework.com/documentation/2.6.x/ScalaJsonCombinators#Format) for implicit conversion.
 
-The interpreters can be set like this in the `build.sbt` file:
+The interpreters can be set like this in the `build.sbt` file (which is the default):
 
     jsonInterpreter := plainCaseClasses
     
-or if play-json-formats should be generated (which is the default behavior):
+or if play-json-formats should be generated:
 
     jsonInterpreter := plainCaseClasses.withPlayJsonFormats
 

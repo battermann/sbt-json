@@ -52,7 +52,7 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
 //  }
 
   "Generated code from JSON document which contains a Scala type name" should "contain a class name with suffix" in {
-    import my.json.models.list._
+    import my.json.models.listmodel._
 
     val json = JsonFile.readeJsonFile("list")
 
@@ -69,5 +69,15 @@ class SbtJsonPluginTests extends FlatSpec with Matchers {
     val geo = Json.parse(json).as[Geo]
 
     geo.geometry.viewport.northeast.lat shouldBe 37.42426708029149
+  }
+
+  "Snake case object name" should "be transformed to camel case" in {
+    import my.json.models.bar._
+
+    val json = JsonFile.readeJsonFile("bar")
+
+    val bar = Json.parse(json).as[Bar]
+
+    bar shouldEqual Bar(TestObj(42))
   }
 }

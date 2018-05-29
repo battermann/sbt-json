@@ -1,11 +1,11 @@
 package sbtjson
 
-import j2cgen.models._
+import json2caseclass.model._
 
 object ErrorMessages {
   def mkMessage(error: SbtJsonFailure): String = {
     error match {
-      case NetworkFailure(url ,ex) =>
+      case NetworkFailure(url, ex) =>
         s"""An network error occurred while trying to retrieve a JSON document from a URL: '$url'
            |${ex.toString}""".stripMargin
       case HttpTimeout(url, ex) =>
@@ -17,14 +17,14 @@ object ErrorMessages {
             s"""An error occurred while extracting the schema from the JSON document from the file or URL: '$fileNameOrUrl#
                |A value '$name# is either null or the value is an array containing a null value.
                |There might be important type information missing because the type of a null value cannot be analyzed.
-               |To ignore null values explicitly set the sbt-json option 'includeJsValues' to ignore null:
-               |'includeJsValues := includeAll.exceptNullValues'""".stripMargin
+               |To ignore null values explicitly set the sbt-json option 'jsValueFilter' to ignore null:
+               |'jsValueFilter := allJsValues.exceptNullValues'""".stripMargin
           case ArrayEmpty(name) =>
             s"""An error occurred while extracting the schema from the JSON document from the file or URL: '$fileNameOrUrl'
                |The value '$name' is an empty array.
                |There might be important type information missing because the type of an empty array cannot be analyzed.
-               |To ignore empty arrays explicitly set the sbt-json option 'includeJsValues' to ignore empty arrays:
-               |'includeJsValues := includeAll.exceptEmptyArrays'""".stripMargin
+               |To ignore empty arrays explicitly set the sbt-json option 'jsValueFilter' to ignore empty arrays:
+               |'jsValueFilter := allJsValues.exceptEmptyArrays'""".stripMargin
           case ArrayTypeNotConsistent(name) =>
             s"""An error occurred while extracting the schema from the JSON document from the file or URL: '$fileNameOrUrl'
                |The type of value '$name' is not consistent. The schema cannot be inferred.""".stripMargin
