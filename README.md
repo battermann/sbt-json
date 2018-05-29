@@ -39,7 +39,7 @@ Install the plugin according to the [sbt documentation](http://www.scala-sbt.org
 
 ### Edit `project/plugins.sbt`
 
-    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.4.0")
+    addSbtPlugin("com.github.battermann" % "sbt-json" % "0.5.0")
 
 ### Edit `build.sbt`
 
