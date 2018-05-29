@@ -1,7 +1,5 @@
 package json2caseclass.model
 
-import java.util.UUID
-
 import cats.data._
 import play.api.libs.json.JsValue
 import shapeless.tag

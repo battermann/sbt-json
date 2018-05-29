@@ -15,7 +15,7 @@ object Http {
 
   @throws(classOf[java.io.IOException])
   @throws(classOf[java.net.SocketTimeoutException])
-  private def executeRequest(url: String, connectTimeout: Int = 5000, readTimeout: Int = 5000, requestMethod: String = "GET") = {
+  private def executeRequest(url: String, connectTimeout: Int, readTimeout: Int, requestMethod: String) = {
     import java.net.{HttpURLConnection, URL}
     val connection = new URL(url).openConnection.asInstanceOf[HttpURLConnection]
     connection.setConnectTimeout(connectTimeout)

@@ -1,6 +1,5 @@
 package json2caseclass.implementation
 
-import json2caseclass.model.CaseClass.ClassName
 import json2caseclass.model.Types.{Interpreter, _}
 import json2caseclass.model.{ScalaType, _}
 

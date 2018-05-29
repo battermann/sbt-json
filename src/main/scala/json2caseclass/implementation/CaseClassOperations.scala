@@ -1,7 +1,5 @@
 package json2caseclass.implementation
 
-import java.util.UUID
-
 import json2caseclass.model.CaseClass.{ClassFieldName, ClassName}
 import json2caseclass.model.ScalaType._
 import json2caseclass.model.{CaseClass, ScalaObject, ScalaOption, ScalaType}
