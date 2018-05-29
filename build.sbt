@@ -5,7 +5,7 @@ resolvers ++= Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    version in ThisBuild := "0.4.0",
+    version in ThisBuild := "0.5.0",
     organization in ThisBuild := "com.github.battermann",
     crossSbtVersions := List("0.13.17", "1.1.5"),
     sbtPlugin := true,
@@ -104,5 +104,15 @@ lazy val mavenPublishingSettings: Seq[Def.Setting[_]] = Seq(
               name = "Leif Battermann",
               email = "leifbattermann@gmail.com",
               url = url("http://github.com/battermann"))
-  )
+  ),
+  credentials ++= (
+    for {
+      username <- sys.env.get("SONATYPE_USER")
+      password <- sys.env.get("SONATYPE_PASSWORD")
+    } yield
+      Credentials("Sonatype Nexus Repository Manager",
+        "oss.sonatype.org",
+        username,
+        password)
+    ).toList
 )
