@@ -5,7 +5,7 @@ import json2caseclass.model._
 object ErrorMessages {
   def mkMessage(error: SbtJsonFailure): String = {
     error match {
-      case NetworkFailure(url ,ex) =>
+      case NetworkFailure(url, ex) =>
         s"""An network error occurred while trying to retrieve a JSON document from a URL: '$url'
            |${ex.toString}""".stripMargin
       case HttpTimeout(url, ex) =>

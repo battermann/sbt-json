@@ -3,20 +3,14 @@ package json2caseclass.implementation
 import cats.data.ReaderWriterStateT._
 import cats.implicits._
 import json2caseclass.model.Schema._
-import json2caseclass.model.Types.{
-  ErrorOr,
-  ErrorRWSOr,
-  JsValueFilter,
-  RootTypeName
-}
+import json2caseclass.model.Types.{ErrorOr, ErrorRWSOr, JsValueFilter, RootTypeName}
 import json2caseclass.model._
 import play.api.libs.json._
 import scala.language.existentials
 
 object SchemaExtractor {
 
-  def extractSchemaFromJsonRoot(rootTypeName: RootTypeName,
-                                value: JsValue): ErrorRWSOr[Schema] = {
+  def extractSchemaFromJsonRoot(rootTypeName: RootTypeName, value: JsValue): ErrorRWSOr[Schema] = {
     value match {
       case JsObject(fields) =>
         extractSchemaFromJsObjectFields(rootTypeName, fields.toList)
@@ -27,9 +21,7 @@ object SchemaExtractor {
     }
   }
 
-  private def extractSchemaFromJsObjectFields(
-      name: String,
-      fields: List[(String, JsValue)]): ErrorRWSOr[Schema] = {
+  private def extractSchemaFromJsObjectFields(name: String, fields: List[(String, JsValue)]): ErrorRWSOr[Schema] = {
     for {
       env <- ask[ErrorOr, Environment, Unit, Int]
       fieldSchemas <- fields
@@ -47,9 +39,7 @@ object SchemaExtractor {
     } yield schema
   }
 
-  private def extractSchemaFromJsValue(
-      name: String,
-      value: JsValue): ErrorRWSOr[(String, Schema)] = {
+  private def extractSchemaFromJsValue(name: String, value: JsValue): ErrorRWSOr[(String, Schema)] = {
     val schemaOrError = value match {
       case JsNull =>
         ? <~ Left(ValueIsNull(name))
@@ -74,9 +64,7 @@ object SchemaExtractor {
     }
   }
 
-  private def extractSchemaFromArray(
-      name: String,
-      values: List[JsValue]): ErrorRWSOr[Schema] = {
+  private def extractSchemaFromArray(name: String, values: List[JsValue]): ErrorRWSOr[Schema] = {
     for {
       env <- ask[ErrorOr, Environment, Unit, Int]
       schemas <- values
@@ -87,8 +75,7 @@ object SchemaExtractor {
       schemaErrorRWSOr = if (schemas forall (haveSameStructure(_, first))) {
         ? <~ Right(SchemaArray(first))
       } else if (schemas forall isObject) {
-        mkSchemaObject(env.nameTransformer.makeSafeCamelCaseClassName(name),
-                       unify(schemas))
+        mkSchemaObject(env.nameTransformer.makeSafeCamelCaseClassName(name), unify(schemas))
           .map(SchemaArray)
       } else {
         ? <~ Left(ArrayTypeNotConsistent(name))
@@ -97,11 +84,10 @@ object SchemaExtractor {
     } yield schema
   }
 
-  private def mkSchemaObject(name: SchemaObjectName,
-                             fields: Seq[(SchemaFieldName, Schema)]) = {
+  private def mkSchemaObject(name: SchemaObjectName, fields: Seq[(SchemaFieldName, Schema)]) = {
     for {
       id <- get[ErrorOr, Environment, Unit, Int]
-      _ <- modify[ErrorOr, Environment, Unit, Int]((_: Int) + 1)
+      _  <- modify[ErrorOr, Environment, Unit, Int]((_: Int) + 1)
     } yield
       SchemaObject(
         id,
@@ -114,8 +100,7 @@ object SchemaExtractor {
     def containsField(t: Schema, field: (String, Schema)) = {
       t match {
         case SchemaObject(_, _, xs) =>
-          xs.exists(x =>
-            x._1 == field._1 && Schema.haveSameStructure(x._2, field._2))
+          xs.exists(x => x._1 == field._1 && Schema.haveSameStructure(x._2, field._2))
         case _ => false
       }
     }
@@ -125,16 +110,12 @@ object SchemaExtractor {
       case _                          => Nil
     }
 
-    def filterDuplicates(list: List[(SchemaFieldName, Schema)])
-      : List[(SchemaFieldName, Schema)] = {
-      def filterRec(list: List[(SchemaFieldName, Schema)],
-                    acc: List[(SchemaFieldName, Schema)])
-        : List[(SchemaFieldName, Schema)] = {
+    def filterDuplicates(list: List[(SchemaFieldName, Schema)]): List[(SchemaFieldName, Schema)] = {
+      def filterRec(list: List[(SchemaFieldName, Schema)], acc: List[(SchemaFieldName, Schema)]): List[(SchemaFieldName, Schema)] = {
         list match {
           case Nil => acc
           case h :: t =>
-            if (acc.exists(
-                  x => x._1 == h._1 && Schema.haveSameStructure(x._2, h._2))) {
+            if (acc.exists(x => x._1 == h._1 && Schema.haveSameStructure(x._2, h._2))) {
               filterRec(t, acc)
             } else {
               filterRec(t, h :: acc)
@@ -146,8 +127,7 @@ object SchemaExtractor {
 
     val (required, optionals) =
       filterDuplicates(allFields)
-        .partition(field =>
-          schemas.forall(schema => containsField(schema, field)))
+        .partition(field => schemas.forall(schema => containsField(schema, field)))
 
     val combinedFields = required ++ optionals.map {
       case (n, s) => (n, SchemaOption(s))

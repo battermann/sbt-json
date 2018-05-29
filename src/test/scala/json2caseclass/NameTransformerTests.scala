@@ -13,15 +13,16 @@ class NameTransformerTests extends FlatSpec with Matchers {
 
   "Invalid object names" should "be transformed correctly" in {
     val objectNames = List(
-      "foo" -> "Foo".toSchemaObjectName,
-      "match" -> "MatchModel".toSchemaObjectName,
+      "foo"     -> "Foo".toSchemaObjectName,
+      "match"   -> "MatchModel".toSchemaObjectName,
       "foo-bar" -> "FooBar".toSchemaObjectName,
-      "3foo" -> "Foo".toSchemaObjectName,
+      "3foo"    -> "Foo".toSchemaObjectName,
       "_foobar" -> "Foobar".toSchemaObjectName
     )
 
-    objectNames foreach { case(in, out) =>
-      implementation.NameTransformer.makeSafeCamelCaseCaseClassName("Model".toSuffix)(in) shouldEqual out
+    objectNames foreach {
+      case (in, out) =>
+        implementation.NameTransformer.makeSafeCamelCaseCaseClassName("Model".toSuffix)(in) shouldEqual out
     }
   }
 
@@ -52,4 +53,3 @@ class NameTransformerTests extends FlatSpec with Matchers {
     }
   }
 }
-

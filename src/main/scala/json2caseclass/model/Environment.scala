@@ -4,6 +4,6 @@ import json2caseclass.implementation.SchemaExtractor
 import json2caseclass.model.Types.JsValueFilter
 
 case class Environment(
-  jsValueFilter: JsValueFilter = SchemaExtractor.allJsValues,
-  nameTransformer: NameTransformer
+    jsValueFilter: JsValueFilter = SchemaExtractor.allJsValues,
+    nameTransformer: NameTransformer
 )

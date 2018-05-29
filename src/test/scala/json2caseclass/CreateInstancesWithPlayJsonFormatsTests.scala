@@ -100,7 +100,8 @@ class CreateInstancesWithPlayJsonFormatsTests extends FlatSpec with Matchers {
 
   "With the generated source from BING it" should "be possible to create instance with play json" in {
 
-    val jsonString = """{"images":[{"startdate":"20170808","fullstartdate":"201708080700","enddate":"20170809","url":"/az/hprichbg/rb/AlaskaLynx_EN-US9313111559_1920x1080.jpg","urlbase":"/az/hprichbg/rb/AlaskaLynx_EN-US9313111559","copyright":"Canada lynx in Denali National Park, Alaska (© Design Pics Inc./Alamy)","copyrightlink":"http://www.bing.com/search?q=canada+lynx&form=hpcapt&filters=HpDate:%2220170808_0700%22","quiz":"/search?q=Bing+homepage+quiz&filters=WQOskey:%22HPQuiz_20170808_AlaskaLynx%22&FORM=HPQUIZ","wp":true,"hsh":"2449488dd2b169148b2745253aa48ee0","drk":1,"top":1,"bot":1,"hs":[]}],"tooltips":{"loading":"Loading...","previous":"Previous image","next":"Next image","walle":"This image is not available to download as wallpaper.","walls":"Download this image. Use of this image is restricted to wallpaper only."}}"""
+    val jsonString =
+      """{"images":[{"startdate":"20170808","fullstartdate":"201708080700","enddate":"20170809","url":"/az/hprichbg/rb/AlaskaLynx_EN-US9313111559_1920x1080.jpg","urlbase":"/az/hprichbg/rb/AlaskaLynx_EN-US9313111559","copyright":"Canada lynx in Denali National Park, Alaska (© Design Pics Inc./Alamy)","copyrightlink":"http://www.bing.com/search?q=canada+lynx&form=hpcapt&filters=HpDate:%2220170808_0700%22","quiz":"/search?q=Bing+homepage+quiz&filters=WQOskey:%22HPQuiz_20170808_AlaskaLynx%22&FORM=HPQUIZ","wp":true,"hsh":"2449488dd2b169148b2745253aa48ee0","drk":1,"top":1,"bot":1,"hs":[]}],"tooltips":{"loading":"Loading...","previous":"Previous image","next":"Next image","walle":"This image is not available to download as wallpaper.","walls":"Download this image. Use of this image is restricted to wallpaper only."}}"""
 
     val bingData = Json.parse(jsonString).as[BingData]
 

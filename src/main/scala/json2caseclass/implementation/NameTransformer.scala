@@ -13,7 +13,7 @@ object NameTransformer {
   )
 
   def makeSafeFieldName(fieldName: String): SchemaFieldName = {
-    if (reservedWords.contains(fieldName.toLowerCase)|| containsInvalidChars(fieldName)) {
+    if (reservedWords.contains(fieldName.toLowerCase) || containsInvalidChars(fieldName)) {
       s"`$fieldName`".toSchemaFieldName
     } else {
       fieldName.toSchemaFieldName
@@ -25,8 +25,9 @@ object NameTransformer {
   }
 
   def normalizeName(suffix: Suffix)(objectName: String): String = {
-    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes.map(_.toLowerCase).contains(
-      objectName.toLowerCase)) {
+    if (reservedWords.contains(objectName.toLowerCase) || scalaTypes
+          .map(_.toLowerCase)
+          .contains(objectName.toLowerCase)) {
       s"${objectName.capitalize}$suffix"
     } else {
       objectName
@@ -39,7 +40,7 @@ object NameTransformer {
   }
 
   def containsInvalidChars(name: String): Boolean = {
-    val invalidChars = "[^a-zA-Z0-9_]"
+    val invalidChars     = "[^a-zA-Z0-9_]"
     val invalidFirstChar = "^[^a-zA-Z_]"
     Pattern.compile(invalidChars).matcher(name).find() ||
     Pattern.compile(invalidFirstChar).matcher(name).find()

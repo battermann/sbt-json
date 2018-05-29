@@ -60,4 +60,3 @@ class CaseClassToStringInterpreterTests extends FlatSpec with Matchers {
     actual shouldEqual expected
   }
 }
-

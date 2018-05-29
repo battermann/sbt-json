@@ -6,7 +6,7 @@ import json2caseclass.model.Types.{Interpreter, JsValueFilter, Suffix, SuffixTag
 import shapeless.tag
 
 case class Config(
-  jsValueFilter: JsValueFilter = SchemaExtractor.allJsValues,
-  suffix: Suffix = tag[SuffixTag][String]("Model"),
-  interpreter: Interpreter = plainCaseClasses
+    jsValueFilter: JsValueFilter = SchemaExtractor.allJsValues,
+    suffix: Suffix = tag[SuffixTag][String]("Model"),
+    interpreter: Interpreter = plainCaseClasses
 )

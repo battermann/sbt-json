@@ -37,11 +37,12 @@ object Types {
   type CaseClassSource = String @@ CaseClassSourceTag
 
   implicit class ToCaseClassSource(caseClassSource: String) {
-    def toCaseClassSource: CaseClassSource = tag[CaseClassSourceTag][String](caseClassSource)
+    def toCaseClassSource: CaseClassSource =
+      tag[CaseClassSourceTag][String](caseClassSource)
   }
 
   type Interpreter = Seq[CaseClass] => CaseClassSource
 
-  type ErrorOr[A] = Either[CaseClassGenerationFailure, A]
+  type ErrorOr[A]    = Either[CaseClassGenerationFailure, A]
   type ErrorRWSOr[A] = ReaderWriterStateT[ErrorOr, Environment, Unit, Int, A]
 }

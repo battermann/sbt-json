@@ -98,11 +98,9 @@ class SchemaExtractorTests extends FlatSpec with Matchers {
       )
     )
 
-
     val actual = SchemaExtractor.extractSchemaFromJsonRoot("Alb".toRootTypeName, Json.parse(json)).runA(env, 1)
 
     actual shouldEqual expected
   }
 
 }
-

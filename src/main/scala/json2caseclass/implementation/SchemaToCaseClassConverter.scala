@@ -18,10 +18,12 @@ object SchemaToCaseClassConverter {
   private def findAllSObjects(schema: Schema): Seq[SchemaObject] = {
     def findRecursively(schema: Schema, acc: Seq[SchemaObject]): Seq[SchemaObject] = {
       schema match {
-        case o@SchemaObject(_, _, fields) =>
+        case o @ SchemaObject(_, _, fields) =>
           val nestedObjects =
             fields
-              .flatMap { case (_, fieldType) => findRecursively(fieldType, Seq()) }
+              .flatMap {
+                case (_, fieldType) => findRecursively(fieldType, Seq())
+              }
           o +: (acc ++ nestedObjects)
         case SchemaArray(arrayType) =>
           findRecursively(arrayType, acc)
@@ -35,20 +37,21 @@ object SchemaToCaseClassConverter {
   }
 
   private def removeDuplicates(schemaObjects: Seq[SchemaObject]): Seq[SchemaObject] = {
-    val duplicates = findDuplicates(schemaObjects)(o => o.id, Schema.haveSameStructure)
+    val duplicates =
+      findDuplicates(schemaObjects)(o => o.id, Schema.haveSameStructure)
 
     schemaObjects
       .filter(o => !duplicates.contains(o.id))
       .map {
-        case o@SchemaObject(_, _, fields) =>
+        case o @ SchemaObject(_, _, fields) =>
           val xs = fields.map {
             case (fieldName, fieldSchema) =>
-            fieldSchema match {
-              case SchemaObject(otherId, _, _) =>
-                (fieldName, duplicates.getOrElse(otherId, fieldSchema))
-              case _ =>
-                (fieldName, fieldSchema)
-            }
+              fieldSchema match {
+                case SchemaObject(otherId, _, _) =>
+                  (fieldName, duplicates.getOrElse(otherId, fieldSchema))
+                case _ =>
+                  (fieldName, fieldSchema)
+              }
           }
           o.copy(fields = xs)
       }
@@ -58,7 +61,8 @@ object SchemaToCaseClassConverter {
     schemaObject match {
       case SchemaObject(id, name, fields) =>
         val caseClassFields = fields.map {
-          case (fieldName, schema) => (fieldName.toClassFieldName, schemaToScalaType(schema))
+          case (fieldName, schema) =>
+            (fieldName.toClassFieldName, schemaToScalaType(schema))
         }
         CaseClass(id, name.toClassName, caseClassFields)
     }
@@ -66,11 +70,11 @@ object SchemaToCaseClassConverter {
 
   private def schemaToScalaType(schema: Schema): ScalaType = {
     schema match {
-      case SchemaOption(s) => ScalaOption(schemaToScalaType(s))
-      case SchemaString => ScalaString
-      case SchemaBoolean => ScalaBoolean
-      case SchemaDouble => ScalaDouble
-      case SchemaArray(s) => ScalaSeq(schemaToScalaType(s))
+      case SchemaOption(s)           => ScalaOption(schemaToScalaType(s))
+      case SchemaString              => ScalaString
+      case SchemaBoolean             => ScalaBoolean
+      case SchemaDouble              => ScalaDouble
+      case SchemaArray(s)            => ScalaSeq(schemaToScalaType(s))
       case SchemaObject(id, name, _) => ScalaObject(id, name.toScalaObjectName)
     }
   }

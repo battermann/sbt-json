@@ -21,7 +21,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
 
     import autoImport._
 
-    val foo = R00t("world")
+    val foo        = R00t("world")
     val jsonString = Json.toJson(foo)
 
     val caseClassSource = generate(Config(interpreter = plainCaseClasses.withPlayJsonFormats))(jsonString.toString.toJsonString, "R00t".toRootTypeName)
@@ -46,7 +46,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
 
     val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
-    val expected ="case class R00t(\n)\n"
+    val expected = "case class R00t(\n)\n"
 
     resultOrError shouldEqual Right(expected)
   }
@@ -61,7 +61,9 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName, Seq(("Foo", "x"), ("R00t", "foo"), ("R00t", "value2")).asInstanceOf[Seq[(ClassName, ClassFieldName)]])
+    val resultOrError = generate(Config())(jsonString.toJsonString,
+                                           "R00t".toRootTypeName,
+                                           Seq(("Foo", "x"), ("R00t", "foo"), ("R00t", "value2")).asInstanceOf[Seq[(ClassName, ClassFieldName)]])
 
     val expected =
       """case class R00t(
@@ -266,8 +268,7 @@ class CaseClassGeneratorTests extends FlatSpec with Matchers {
 
     val resultOrError = generate(Config())(jsonString.toJsonString, "R00t".toRootTypeName)
 
-    val expected = Right(
-      """case class R00t(
+    val expected = Right("""case class R00t(
         |  `type`: TypeModel
         |)
         |

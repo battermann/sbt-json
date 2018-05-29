@@ -7,22 +7,20 @@ import json2caseclass.model.{ScalaType, _}
 object CaseClassToStringInterpreter {
 
   implicit class InterpreterOptions(interpreter: Interpreter) {
-    def withPlayJsonFormats = CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
+    def withPlayJsonFormats =
+      CaseClassToStringInterpreter.withPlayJsonFormats(interpreter)
   }
 
-  def withPlayJsonFormats: Interpreter => Interpreter = {
-    interpreter => {
-      caseClasses =>
-        s"""${interpreter(caseClasses)}
+  def withPlayJsonFormats: Interpreter => Interpreter = { interpreter =>
+    { caseClasses =>
+      s"""${interpreter(caseClasses)}
            |${createCompanionObjectWithPlayJsonFormats(caseClasses)}
-           |"""
-          .stripMargin
-          .toCaseClassSource
+           |""".stripMargin.toCaseClassSource
     }
   }
 
-  def plainCaseClasses: Interpreter = {
-    caseClasses => {
+  def plainCaseClasses: Interpreter = { caseClasses =>
+    {
       val caseClassSource = caseClasses
         .map(interpret)
         .mkString("\n\n") + "\n"
@@ -51,7 +49,7 @@ object CaseClassToStringInterpreter {
     val CaseClass(_, _, fields) = caseClass
 
     fields.forall {
-      case o@(_, ScalaObject(_, _)) =>
+      case o @ (_, ScalaObject(_, _)) =>
         typeExistsInUnresolvedDeps(alreadyDefined, o._2)
       case (_, ScalaSeq(t)) =>
         typeExistsInUnresolvedDeps(alreadyDefined, t)
@@ -75,7 +73,6 @@ object CaseClassToStringInterpreter {
     }
   }
 
-
   private def createCompanionObjectWithPlayJsonFormats(caseClasses: Seq[CaseClass]): String = {
     val formats =
       sortForPlayJsonFormats(caseClasses)
@@ -92,8 +89,9 @@ object CaseClassToStringInterpreter {
   private def interpret(caseClass: CaseClass): String = {
     val CaseClass(_, name, fields) = caseClass
 
-    val members = fields.map { case (fieldName, fieldType) =>
-      s"$fieldName: ${typeName(fieldType)}"
+    val members = fields.map {
+      case (fieldName, fieldType) =>
+        s"$fieldName: ${typeName(fieldType)}"
     }
 
     s"case class $name(${members.map(m => s"\n  $m").mkString(",")}\n)"
@@ -102,12 +100,11 @@ object CaseClassToStringInterpreter {
   private def typeName(scalaType: ScalaType): String = {
     scalaType match {
       case ScalaOption(optionType) => s"Option[${typeName(optionType)}]"
-      case ScalaString => "String"
-      case ScalaDouble => "Double"
-      case ScalaBoolean => "Boolean"
-      case ScalaSeq(seqType) => s"Seq[${typeName(seqType)}]"
-      case ScalaObject(_, name) => name
+      case ScalaString             => "String"
+      case ScalaDouble             => "Double"
+      case ScalaBoolean            => "Boolean"
+      case ScalaSeq(seqType)       => s"Seq[${typeName(seqType)}]"
+      case ScalaObject(_, name)    => name
     }
   }
 }
-

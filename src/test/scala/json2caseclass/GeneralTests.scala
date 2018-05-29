@@ -16,8 +16,8 @@ class GeneralTests extends FlatSpec with Matchers {
 
     import autoImport._
 
-    val foo = R00t("world")
-    val jsonString = Json.toJson(foo).toString
+    val foo           = R00t("world")
+    val jsonString    = Json.toJson(foo).toString
     val convertedBack = Json.parse(jsonString).as[R00t]
     convertedBack shouldEqual foo
   }
@@ -39,4 +39,3 @@ class GeneralTests extends FlatSpec with Matchers {
     data.head shouldEqual 1
   }
 }
-
